@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TrackFlow | Logística de Última Milla para E-commerce</title>
+    <meta
+      name="description"
+      content="TrackFlow gestiona almacenamiento, preparación de pedidos, envíos y devoluciones para marcas e-commerce en Estados Unidos y España."
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://trackflow.example.com/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="TrackFlow | Logística de Última Milla para E-commerce" />
+    <meta
+      property="og:description"
+      content="Operaciones logísticas de punta a punta: almacén, última milla y devoluciones en EE. UU. y España."
+    />
+    <meta property="og:url" content="https://trackflow.example.com/" />
+    <meta property="og:image" content="https://trackflow.example.com/og-image.jpg" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TrackFlow | Logística de Última Milla para E-commerce" />
+    <meta
+      name="twitter:description"
+      content="Escala tu operación logística con visibilidad y ejecución en dos mercados: EE. UU. y España."
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#eef9f8",
+                100: "#d3f0ec",
+                500: "#0f766e",
+                600: "#0c5f59",
+                900: "#113a37"
+              },
+              accent: {
+                500: "#f97316",
+                600: "#ea580c"
+              },
+              ink: {
+                900: "#0f172a",
+                700: "#334155",
+                500: "#64748b"
+              }
+            },
+            fontFamily: {
+              sans: ["Manrope", "sans-serif"],
+              display: ["Space Grotesk", "sans-serif"]
+            },
+            keyframes: {
+              rise: {
+                "0%": { opacity: "0", transform: "translateY(18px)" },
+                "100%": { opacity: "1", transform: "translateY(0)" }
+              }
+            },
+            animation: {
+              rise: "rise .7s ease-out both"
+            }
+          }
+        }
+      };
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "TrackFlow",
+        "url": "https://trackflow.example.com",
+        "description": "Empresa de logística de última milla y gestión de almacenes para e-commerce en Estados Unidos y España.",
+        "foundingDate": "2009",
+        "numberOfEmployees": "130",
+        "founder": {
+          "@type": "Person",
+          "name": "Thomas Harry"
+        },
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "contactType": "sales",
+            "email": "sales@trackflow.example.com",
+            "telephone": "+1-213-555-0199",
+            "areaServed": ["US", "ES"],
+            "availableLanguage": ["Spanish", "English"]
+          }
+        ],
+        "sameAs": []
+      }
+    </script>
+  </head>
+
+  <body data-page="index" class="bg-slate-50 text-ink-900 antialiased">
+    <a
+      href="#main-content"
+      data-i18n="skipToContent"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-ink-900"
+    >
+      Saltar al contenido principal
+    </a>
+
+    <header class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur">
+      <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
+        <a href="index.html" class="font-display text-xl font-bold tracking-tight text-ink-900" aria-label="Inicio TrackFlow">
+          TrackFlow
+        </a>
+
+        <nav aria-label="Navegación principal" data-i18n-aria-label="mainNavigation" class="hidden md:block">
+          <ul class="flex items-center gap-8 text-sm font-semibold text-ink-700">
+            <li><a data-i18n="navServices" href="#servicios" class="hover:text-brand-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Servicios</a></li>
+            <li><a data-i18n="navBenefits" href="#beneficios" class="hover:text-brand-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Beneficios</a></li>
+            <li><a data-i18n="navContact" href="#contacto" class="hover:text-brand-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">Contacto</a></li>
+          </ul>
+        </nav>
+
+        <div class="flex items-center gap-2">
+          <div role="group" aria-label="Selector de idioma" data-i18n-aria-label="languageSelector" class="flex rounded-lg border border-slate-300 bg-white p-1">
+            <button type="button" data-lang-switch="es" class="rounded-md px-2 py-1 text-xs font-bold text-ink-700">ES</button>
+            <button type="button" data-lang-switch="en" class="rounded-md px-2 py-1 text-xs font-bold text-ink-700">EN</button>
+          </div>
+          <a
+            data-i18n="ctaHeader"
+            href="application.html"
+            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-brand-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+          >
+            Solicitar Asesoría
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section class="relative overflow-hidden">
+        <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(15,118,110,0.14),transparent_42%),radial-gradient(circle_at_80%_10%,rgba(249,115,22,0.2),transparent_35%),linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)]"></div>
+
+        <div class="mx-auto grid max-w-7xl gap-10 px-6 py-20 md:grid-cols-2 md:items-center lg:px-8 lg:py-24">
+          <div class="animate-rise space-y-6">
+            <p data-i18n="heroBadge" class="inline-flex rounded-full border border-brand-100 bg-white px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand-600">
+              Logística para e-commerce en crecimiento
+            </p>
+            <h1 data-i18n="heroTitle" class="font-display text-4xl font-bold leading-tight text-ink-900 sm:text-5xl">
+              Tu marca vende. <span class="text-brand-600">TrackFlow</span> se encarga de entregar.
+            </h1>
+            <p data-i18n="heroDescription" class="max-w-xl text-lg leading-relaxed text-ink-700">
+              Operamos almacenamiento, preparación de pedidos, última milla y devoluciones para marcas que necesitan escalar sin perder control. Presencia activa en Estados Unidos y España.
+            </p>
+            <div class="flex flex-col gap-3 sm:flex-row">
+              <a
+                data-i18n="ctaHeroPrimary"
+                href="application.html"
+                class="rounded-xl bg-accent-500 px-6 py-3 text-center text-sm font-bold text-white shadow-lg shadow-orange-200 transition hover:bg-accent-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500"
+              >
+                Solicitar Asesoría
+              </a>
+              <a
+                data-i18n="ctaHeroSecondary"
+                href="#servicios"
+                class="rounded-xl border border-slate-300 bg-white px-6 py-3 text-center text-sm font-bold text-ink-900 transition hover:border-brand-500 hover:text-brand-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+              >
+                Ver servicios
+              </a>
+            </div>
+          </div>
+
+          <div class="animate-rise rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/60 [animation-delay:.15s]">
+            <h2 data-i18n="metricsTitle" class="font-display text-2xl font-bold">Resultados operativos, no promesas</h2>
+            <dl class="mt-6 grid gap-5 sm:grid-cols-2">
+              <div class="rounded-xl bg-slate-50 p-4">
+                <dt data-i18n="metricYears" class="text-xs font-semibold uppercase tracking-widest text-ink-500">Años de experiencia</dt>
+                <dd class="mt-1 text-2xl font-extrabold text-brand-600">15+</dd>
+              </div>
+              <div class="rounded-xl bg-slate-50 p-4">
+                <dt data-i18n="metricMarkets" class="text-xs font-semibold uppercase tracking-widest text-ink-500">Mercados activos</dt>
+                <dd class="mt-1 text-2xl font-extrabold text-brand-600">US + ES</dd>
+              </div>
+              <div class="rounded-xl bg-slate-50 p-4">
+                <dt data-i18n="metricTeam" class="text-xs font-semibold uppercase tracking-widest text-ink-500">Equipo especializado</dt>
+                <dd class="mt-1 text-2xl font-extrabold text-brand-600">130 personas</dd>
+              </div>
+              <div class="rounded-xl bg-slate-50 p-4">
+                <dt data-i18n="metricCoverage" class="text-xs font-semibold uppercase tracking-widest text-ink-500">Cobertura</dt>
+                <dd class="mt-1 text-2xl font-extrabold text-brand-600">8 transportistas</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <section id="servicios" class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center">
+          <h2 data-i18n="servicesTitle" class="font-display text-3xl font-bold text-ink-900">Todo el ciclo logístico en un solo partner</h2>
+          <p data-i18n="servicesDescription" class="mt-4 text-ink-700">
+            Desde el inventario hasta la devolución, TrackFlow toma la responsabilidad completa para que tu equipo se concentre en producto y ventas.
+          </p>
+        </div>
+
+        <div class="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 data-i18n="serviceWarehouseTitle" class="font-display text-xl font-bold text-ink-900">Gestión de almacén</h3>
+            <p data-i18n="serviceWarehouseDesc" class="mt-3 text-sm leading-relaxed text-ink-700">Control de inventario, preparación y empaquetado de pedidos en Los Ángeles y Zaragoza.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 data-i18n="serviceLastMileTitle" class="font-display text-xl font-bold text-ink-900">Última milla</h3>
+            <p data-i18n="serviceLastMileDesc" class="mt-3 text-sm leading-relaxed text-ink-700">Orquestación de envíos con red multicarrier para optimizar tiempos, costos y tasa de entrega.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 data-i18n="serviceReturnsTitle" class="font-display text-xl font-bold text-ink-900">Logística inversa</h3>
+            <p data-i18n="serviceReturnsDesc" class="mt-3 text-sm leading-relaxed text-ink-700">Procesos de devolución, reacondicionamiento y decisiones operativas para proteger tu margen.</p>
+          </article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 data-i18n="serviceVisibilityTitle" class="font-display text-xl font-bold text-ink-900">Visibilidad operativa</h3>
+            <p data-i18n="serviceVisibilityDesc" class="mt-3 text-sm leading-relaxed text-ink-700">Seguimiento integral para que tu equipo y tus clientes sepan qué pasa en cada etapa.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="beneficios" class="bg-ink-900 py-16 text-white">
+        <div class="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-2 lg:px-8">
+          <div>
+            <h2 data-i18n="benefitsTitle" class="font-display text-3xl font-bold">Por qué marcas exigentes eligen TrackFlow</h2>
+            <p data-i18n="benefitsDescription" class="mt-4 max-w-xl text-slate-200">
+              No somos un proveedor puntual. Operamos como extensión de tu negocio para elevar tu experiencia de cliente y tus métricas de retención.
+            </p>
+          </div>
+          <ul class="grid gap-4 text-sm sm:grid-cols-2">
+            <li data-i18n="benefit1" class="rounded-xl border border-white/20 bg-white/5 p-4">Modelo operativo binacional preparado para crecimiento.</li>
+            <li data-i18n="benefit2" class="rounded-xl border border-white/20 bg-white/5 p-4">Equipo humano experto en operaciones complejas.</li>
+            <li data-i18n="benefit3" class="rounded-xl border border-white/20 bg-white/5 p-4">Capacidad para gestionar picos de demanda estacional.</li>
+            <li data-i18n="benefit4" class="rounded-xl border border-white/20 bg-white/5 p-4">Enfoque en reducción de errores y tiempos de ciclo.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="contacto" class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+        <div class="rounded-3xl border border-brand-100 bg-gradient-to-r from-brand-50 to-orange-50 p-8 sm:p-10">
+          <h2 data-i18n="contactTitle" class="font-display text-3xl font-bold text-ink-900">¿Listo para modernizar tu logística?</h2>
+          <p data-i18n="contactDescription" class="mt-3 max-w-2xl text-ink-700">
+            Completa el formulario de asesoría para que nuestro equipo conozca tu operación y te contacte con una propuesta personalizada. Sin compromiso, solo resultados.
+          </p>
+          <div class="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="text-sm text-ink-700">
+              <p><strong>Email:</strong> sales@trackflow.example.com</p>
+              <p><strong data-i18n="contactPhoneLabel">Tel:</strong> +1 213 555 0199</p>
+            </div>
+            <a
+              data-i18n="ctaContact"
+              href="application.html"
+              class="inline-flex items-center justify-center rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+            >
+              Solicitar Asesoría
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-slate-200 bg-white py-8">
+      <div class="mx-auto flex max-w-7xl flex-col gap-3 px-6 text-sm text-ink-500 sm:flex-row sm:items-center sm:justify-between lg:px-8">
+        <p data-i18n="footerRights">© 2026 TrackFlow. Todos los derechos reservados.</p>
+        <p data-i18n="footerLocations">Los Ángeles, Estados Unidos · Zaragoza, España</p>
+      </div>
+    </footer>
+
+    <script src="i18n.js"></script>
+  </body>
+</html>

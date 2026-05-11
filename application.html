@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solicitar Asesoría | TrackFlow</title>
+    <meta
+      name="description"
+      content="Formulario de solicitud de asesoría de TrackFlow para empresas interesadas en servicios logísticos."
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://trackflow.example.com/application.html" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#eef9f8",
+                500: "#0f766e",
+                600: "#0c5f59"
+              },
+              ink: {
+                900: "#0f172a",
+                700: "#334155",
+                500: "#64748b"
+              }
+            },
+            fontFamily: {
+              sans: ["Manrope", "sans-serif"],
+              display: ["Space Grotesk", "sans-serif"]
+            }
+          }
+        }
+      };
+    </script>
+  </head>
+
+  <body data-page="application" class="min-h-screen bg-slate-50 text-ink-900 antialiased">
+    <a
+      href="#main-content"
+      data-i18n="skipToForm"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2"
+    >
+      Saltar al formulario
+    </a>
+
+    <header class="border-b border-slate-200 bg-white">
+      <div class="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+        <a href="index.html" class="font-display text-xl font-bold text-ink-900">TrackFlow</a>
+        <div class="flex items-center gap-2">
+          <div role="group" aria-label="Selector de idioma" data-i18n-aria-label="languageSelector" class="flex rounded-lg border border-slate-300 bg-white p-1">
+            <button type="button" data-lang-switch="es" class="rounded-md px-2 py-1 text-xs font-bold text-ink-700">ES</button>
+            <button type="button" data-lang-switch="en" class="rounded-md px-2 py-1 text-xs font-bold text-ink-700">EN</button>
+          </div>
+          <a
+            data-i18n="backHome"
+            href="index.html"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-ink-700 transition hover:border-brand-500 hover:text-brand-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+          >
+            Volver al inicio
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content" class="mx-auto max-w-5xl px-6 py-12">
+      <section class="mb-8 rounded-2xl border border-brand-100 bg-brand-50 p-6">
+        <h1 data-i18n="formTitle" class="font-display text-3xl font-bold text-ink-900">Solicitar asesoría</h1>
+        <p data-i18n="formDescription" class="mt-2 max-w-3xl text-sm text-ink-700">
+          Completa este formulario para que el equipo de TrackFlow conozca tu operación y te contacte con una propuesta de servicios.
+        </p>
+      </section>
+
+      <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <form id="application-form" novalidate aria-describedby="form-status" class="space-y-8">
+          <fieldset class="space-y-5">
+            <legend data-i18n="contactData" class="font-display text-xl font-bold text-ink-900">Datos de contacto</legend>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label data-i18n="fullNameLabel" for="fullName" class="mb-2 block text-sm font-semibold text-ink-700">Nombre completo *</label>
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  autocomplete="name"
+                  required
+                  class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+                />
+                <p id="fullName-error" class="mt-1 min-h-5 text-sm text-red-700" aria-live="polite"></p>
+              </div>
+
+              <div>
+                <label data-i18n="companyLabel" for="company" class="mb-2 block text-sm font-semibold text-ink-700">Empresa *</label>
+                <input
+                  id="company"
+                  name="company"
+                  type="text"
+                  autocomplete="organization"
+                  required
+                  class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+                />
+                <p id="company-error" class="mt-1 min-h-5 text-sm text-red-700" aria-live="polite"></p>
+              </div>
+
+              <div>
+                <label data-i18n="emailLabel" for="email" class="mb-2 block text-sm font-semibold text-ink-700">Email corporativo *</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  required
+                  class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+                />
+                <p id="email-error" class="mt-1 min-h-5 text-sm text-red-700" aria-live="polite"></p>
+              </div>
+
+              <div>
+                <label data-i18n="phoneLabel" for="phone" class="mb-2 block text-sm font-semibold text-ink-700">Teléfono de contacto</label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  autocomplete="tel"
+                  class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+                />
+                <p id="phone-error" class="mt-1 min-h-5 text-sm text-red-700" aria-live="polite"></p>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset class="space-y-5">
+            <legend data-i18n="servicesLabel" class="font-display text-xl font-bold text-ink-900">Servicios de interés</legend>
+
+            <div>
+              <div role="group" aria-describedby="services-error" class="grid gap-3 sm:grid-cols-2">
+                <label class="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-ink-700">
+                  <input type="checkbox" name="services" value="warehouse" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
+                  <span data-i18n="serviceWarehouse">Gestión de almacén</span>
+                </label>
+                <label class="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-ink-700">
+                  <input type="checkbox" name="services" value="lastMile" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
+                  <span data-i18n="serviceLastMile">Última milla</span>
+                </label>
+                <label class="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-ink-700">
+                  <input type="checkbox" name="services" value="returns" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
+                  <span data-i18n="serviceReturns">Logística inversa</span>
+                </label>
+                <label class="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-ink-700">
+                  <input type="checkbox" name="services" value="support" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
+                  <span data-i18n="serviceSupport">Soporte y visibilidad operativa</span>
+                </label>
+              </div>
+              <p id="services-error" class="mt-1 min-h-5 text-sm text-red-700" aria-live="polite"></p>
+            </div>
+
+            <div>
+              <label data-i18n="detailsLabel" for="details" class="mb-2 block text-sm font-semibold text-ink-700">Observaciones de la operación</label>
+              <textarea
+                id="details"
+                name="details"
+                rows="4"
+                data-i18n-placeholder="detailsPlaceholder"
+                placeholder="Cuéntanos brevemente tu contexto operativo y lo que necesitas resolver."
+                class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              ></textarea>
+              <p id="details-error" class="mt-1 min-h-5 text-sm text-red-700" aria-live="polite"></p>
+            </div>
+          </fieldset>
+
+          <div class="space-y-4">
+            <button
+              type="submit"
+              data-i18n="submitButton"
+              class="w-full rounded-xl bg-brand-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 sm:w-auto"
+            >
+              Solicitar asesoría
+            </button>
+            <p id="form-status" class="min-h-6 text-sm font-semibold" aria-live="polite"></p>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <footer class="border-t border-slate-200 bg-white py-6">
+      <div data-i18n="footerShort" class="mx-auto max-w-5xl px-6 text-sm text-ink-500">© 2026 TrackFlow</div>
+    </footer>
+
+    <script src="i18n.js"></script>
+    <script src="validation.js"></script>
+  </body>
+</html>
