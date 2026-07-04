@@ -4,9 +4,11 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import FeedbackAlert from '@/src/components/FeedbackAlert';
 import { trackerApi } from '@/services/api';
 import { useLocation } from '@/src/context/LocationContext';
-import type { CandidateRecord, CandidateStage, CandidateStatus } from '@/src/types/tracker';
+import type { LocationHub } from '@/src/context/LocationContext';
+import type { CandidateInput, CandidateRecord, CandidateStage, CandidateStatus } from '@/src/types/tracker';
 
 const STATUS_OPTIONS: CandidateStatus[] = [
   'pending',
@@ -195,10 +197,16 @@ type CandidateWithLocation = CandidateRecord & {
   hub?: string;
 };
 
+const CANDIDATE_CITY_MAP_KEY = 'tracker:candidate-city-map';
+
 function filterByLocation(
   records: CandidateRecord[],
-  location: 'Zaragoza' | 'Los Ángeles',
+  location: LocationHub,
 ): CandidateRecord[] {
+  if (location === 'Todas') {
+    return records;
+  }
+
   return records.filter((candidate) => {
     const record = candidate as CandidateWithLocation;
     const cityText = (record.city ?? record.hub ?? '').toLowerCase();
@@ -244,11 +252,25 @@ export default function Page() {
   const { location, setLocation } = useLocation();
 
   const [locale, setLocale] = useState<Locale>('es');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [candidates, setCandidates] = useState<CandidateRecord[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+  const [candidateCityMap, setCandidateCityMap] = useState<Record<string, LocationHub>>({});
+  const [formData, setFormData] = useState({
+    full_name: '',
+    email: '',
+    phone: '',
+    position: '',
+    linkedin_url: '',
+    cv_url: '',
+    experience_years: '',
+  });
 
   const t = dictionary[locale];
 
@@ -260,10 +282,55 @@ export default function Page() {
     return stageLabels[locale][stage];
   }
 
+  function getStatusDisplayLabel(status: CandidateStatus): string {
+    return statusLabels[locale][status] ?? toLabel(status);
+  }
+
+  function getStageDisplayLabel(stage: CandidateStage): string {
+    return stageLabels[locale][stage] ?? toLabel(stage);
+  }
+
   const searchParamsKey = searchParams.toString();
 
   const statusFromUrl = searchParams.get('status') ?? '';
   const stageFromUrl = searchParams.get('stage') ?? '';
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(CANDIDATE_CITY_MAP_KEY);
+      if (!stored) return;
+
+      const parsed = JSON.parse(stored) as Record<string, string>;
+      const normalized: Record<string, LocationHub> = {};
+
+      Object.entries(parsed).forEach(([id, city]) => {
+        if (city === 'Zaragoza' || city === 'Los Ángeles') {
+          normalized[id] = city;
+        }
+      });
+
+      setCandidateCityMap(normalized);
+    } catch {
+      setCandidateCityMap({});
+    }
+  }, []);
+
+  function saveCandidateCityMap(nextMap: Record<string, LocationHub>) {
+    setCandidateCityMap(nextMap);
+    window.localStorage.setItem(CANDIDATE_CITY_MAP_KEY, JSON.stringify(nextMap));
+  }
+
+  function withMappedCity(records: CandidateRecord[]): CandidateRecord[] {
+    return records.map((record) => {
+      const mappedCity = candidateCityMap[record.id];
+      if (!mappedCity) return record;
+
+      return {
+        ...record,
+        city: mappedCity,
+      } as CandidateRecord;
+    });
+  }
 
   useEffect(() => {
     let active = true;
@@ -276,7 +343,8 @@ export default function Page() {
         const data = await trackerApi.getCandidates();
         if (!active) return;
 
-        const locationFiltered = filterByLocation(data, location);
+        const withLocation = withMappedCity(data);
+        const locationFiltered = filterByLocation(withLocation, location);
         const queryFiltered = filterByQueryParams(
           locationFiltered,
           new URLSearchParams(searchParamsKey),
@@ -299,7 +367,7 @@ export default function Page() {
     return () => {
       active = false;
     };
-  }, [location, searchParamsKey]);
+  }, [location, searchParamsKey, candidateCityMap]);
 
   function setQueryParam(key: 'status' | 'stage', value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -337,6 +405,97 @@ export default function Page() {
   function getTrackFlowFallback(index: number): string {
     const roles = [t.fallbackOps, t.fallbackTech, t.fallbackReverse];
     return roles[index % roles.length];
+  }
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitError(null);
+    setSubmitSuccess(null);
+
+    const requiredFields = [
+      formData.full_name,
+      formData.email,
+      formData.phone,
+      formData.position,
+      formData.experience_years,
+    ];
+
+    if (requiredFields.some((value) => !value.trim())) {
+      setSubmitError('Completa todos los campos requeridos antes de continuar.');
+      return;
+    }
+
+    const experienceYears = Number(formData.experience_years);
+    if (!Number.isFinite(experienceYears) || experienceYears < 0) {
+      setSubmitError('Los años de experiencia deben ser un número válido igual o mayor a 0.');
+      return;
+    }
+
+    const cvUrl = formData.cv_url.trim();
+
+    const selectedCity = location === 'Todas' ? 'Zaragoza' : location;
+
+    const payload: CandidateInput & { city: 'Zaragoza' | 'Los Ángeles' } = {
+      full_name: formData.full_name.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      position: formData.position.trim(),
+      linkedin_url: formData.linkedin_url.trim() || null,
+      cv_url: cvUrl || '',
+      experience_years: Number(experienceYears),
+      status: 'pending',
+      stage: 'screening',
+      city: selectedCity,
+    };
+
+    setIsSubmitting(true);
+
+    try {
+      const createdCandidate = await trackerApi.createCandidate(payload);
+
+      const nextCityMap: Record<string, LocationHub> = {
+        ...candidateCityMap,
+        [createdCandidate.id]: selectedCity,
+      };
+      saveCandidateCityMap(nextCityMap);
+
+      const data = await trackerApi.getCandidates();
+      const withLocation = data.map((record) => {
+        const mappedCity = nextCityMap[record.id];
+        if (!mappedCity) return record;
+
+        return {
+          ...record,
+          city: mappedCity,
+        } as CandidateRecord;
+      });
+      const locationFiltered = filterByLocation(withLocation, location);
+      const queryFiltered = filterByQueryParams(
+        locationFiltered,
+        new URLSearchParams(searchParamsKey),
+      );
+
+      setCandidates(queryFiltered);
+      setSubmitSuccess('Candidatura creada correctamente.');
+      setFormData({
+        full_name: '',
+        email: '',
+        phone: '',
+        position: '',
+        linkedin_url: '',
+        cv_url: '',
+        experience_years: '',
+      });
+
+      window.setTimeout(() => {
+        setIsModalOpen(false);
+        setSubmitSuccess(null);
+      }, 900);
+    } catch (submitErr) {
+      setSubmitError(submitErr instanceof Error ? submitErr.message : 'No se pudo crear la candidatura.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function renderSidebar() {
@@ -439,9 +598,10 @@ export default function Page() {
             <div className="hidden sm:flex items-center gap-xs px-sm py-1.5 bg-surface-container-low rounded-full cursor-pointer hover:bg-surface-container-high transition-colors">
               <select
                 value={location}
-                onChange={(event) => setLocation(event.target.value as 'Zaragoza' | 'Los Ángeles')}
+                onChange={(event) => setLocation(event.target.value as LocationHub)}
                 className="bg-transparent border-none text-label-md font-label-md focus:ring-0 cursor-pointer pr-8"
               >
+                <option value="Todas">Todas</option>
                 <option value="Zaragoza">Zaragoza</option>
                 <option value="Los Ángeles">Los Ángeles</option>
               </select>
@@ -503,15 +663,21 @@ export default function Page() {
               </div>
             </div>
 
-            <button className="w-full bg-[#1e3a8a] text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-blue-900 transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
+            <button
+              className="w-full bg-[#1e3a8a] text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-blue-900 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+              onClick={() => {
+                setSubmitError(null);
+                setSubmitSuccess(null);
+                setIsModalOpen(true);
+              }}
+              type="button"
+            >
               + Nuevo candidato
             </button>
           </div>
 
           {error ? (
-            <div className="mb-lg bg-error-container text-on-error-container border border-red-200 p-md rounded-lg">
-              {t.loadError}: {error}
-            </div>
+            <FeedbackAlert message={t.loadError + ': ' + error} variant="error" className="mb-lg p-md" />
           ) : null}
 
           <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm w-full max-w-full min-w-0">
@@ -580,12 +746,12 @@ export default function Page() {
                             </td>
                             <td className="px-lg py-4">
                               <span className={'inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md ' + getStatusChipClass(candidate.status)}>
-                                {toLabel(candidate.status)}
+                                {getStatusDisplayLabel(candidate.status)}
                               </span>
                             </td>
                             <td className="px-lg py-4">
                               <span className={'inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md ' + getStageChipClass(candidate.stage)}>
-                                {toLabel(candidate.stage)}
+                                {getStageDisplayLabel(candidate.stage)}
                               </span>
                             </td>
                             <td className="px-lg py-4 text-right">
@@ -648,10 +814,10 @@ export default function Page() {
 
                         <div className="mt-3 flex flex-wrap gap-2">
                           <span className={'inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md ' + getStatusChipClass(candidate.status)}>
-                            {toLabel(candidate.status)}
+                            {getStatusDisplayLabel(candidate.status)}
                           </span>
                           <span className={'inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md ' + getStageChipClass(candidate.stage)}>
-                            {toLabel(candidate.stage)}
+                            {getStageDisplayLabel(candidate.stage)}
                           </span>
                         </div>
 
@@ -707,6 +873,128 @@ export default function Page() {
           </div>
         </div>
       </main>
+
+      {isModalOpen ? (
+        <div className="fixed inset-0 z-50 p-4 sm:p-6">
+          <button
+            aria-label="Cerrar modal"
+            className="absolute inset-0 bg-black/50"
+            onClick={() => {
+              if (isSubmitting) return;
+              setIsModalOpen(false);
+              setSubmitError(null);
+              setSubmitSuccess(null);
+            }}
+            type="button"
+          />
+
+          <div className="relative mx-auto mt-8 sm:mt-12 w-[min(92vw,42rem)] max-h-[90vh] overflow-hidden rounded-xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 sm:px-6">
+              <h2 className="text-base sm:text-lg font-bold text-gray-900">Registrar nueva candidatura</h2>
+              <button
+                aria-label="Cerrar modal"
+                className="h-9 w-9 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50"
+                onClick={() => {
+                  if (isSubmitting) return;
+                  setIsModalOpen(false);
+                  setSubmitError(null);
+                  setSubmitSuccess(null);
+                }}
+                type="button"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="max-h-[calc(90vh-64px)] overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
+              {submitError ? (
+                <FeedbackAlert message={submitError} variant="error" className="mb-4 px-3 py-2" />
+              ) : null}
+
+              {submitSuccess ? (
+                <FeedbackAlert message={submitSuccess} variant="success" className="mb-4 px-3 py-2" />
+              ) : null}
+
+              <form className="space-y-4" onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input
+                    className="sm:col-span-2 w-full min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white text-gray-900 focus:outline-none focus:border-blue-600"
+                    placeholder="Nombre completo *"
+                    value={formData.full_name}
+                    onChange={(event) => setFormData((prev) => ({ ...prev, full_name: event.target.value }))}
+                    type="text"
+                  />
+                  <input
+                    className="sm:col-span-2 w-full min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white text-gray-900 focus:outline-none focus:border-blue-600"
+                    placeholder="Email *"
+                    value={formData.email}
+                    onChange={(event) => setFormData((prev) => ({ ...prev, email: event.target.value }))}
+                    type="email"
+                  />
+                  <input
+                    className="w-full min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white text-gray-900 focus:outline-none focus:border-blue-600"
+                    placeholder="Teléfono *"
+                    value={formData.phone}
+                    onChange={(event) => setFormData((prev) => ({ ...prev, phone: event.target.value }))}
+                    type="tel"
+                  />
+                  <input
+                    className="w-full min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white text-gray-900 focus:outline-none focus:border-blue-600"
+                    placeholder="Años de experiencia *"
+                    value={formData.experience_years}
+                    onChange={(event) => setFormData((prev) => ({ ...prev, experience_years: event.target.value }))}
+                    type="number"
+                    min={0}
+                  />
+                  <input
+                    className="sm:col-span-2 w-full min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white text-gray-900 focus:outline-none focus:border-blue-600"
+                    placeholder="Puesto *"
+                    value={formData.position}
+                    onChange={(event) => setFormData((prev) => ({ ...prev, position: event.target.value }))}
+                    type="text"
+                  />
+                  <input
+                    className="sm:col-span-2 w-full min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white text-gray-900 focus:outline-none focus:border-blue-600"
+                    placeholder="LinkedIn"
+                    value={formData.linkedin_url}
+                    onChange={(event) => setFormData((prev) => ({ ...prev, linkedin_url: event.target.value }))}
+                    type="url"
+                  />
+                  <input
+                    className="sm:col-span-2 w-full min-w-0 px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white text-gray-900 focus:outline-none focus:border-blue-600"
+                    placeholder="Enlace al CV"
+                    value={formData.cv_url}
+                    onChange={(event) => setFormData((prev) => ({ ...prev, cv_url: event.target.value }))}
+                    type="url"
+                  />
+                </div>
+
+                <div className="pt-2 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+                  <button
+                    className="w-full sm:w-auto px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50"
+                    onClick={() => {
+                      if (isSubmitting) return;
+                      setIsModalOpen(false);
+                      setSubmitError(null);
+                      setSubmitSuccess(null);
+                    }}
+                    type="button"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    className="w-full sm:w-auto bg-[#1e3a8a] text-white px-5 py-2 rounded-lg font-semibold text-sm hover:bg-blue-900 disabled:opacity-70"
+                    disabled={isSubmitting}
+                    type="submit"
+                  >
+                    {isSubmitting ? 'Guardando...' : 'Registrar candidatura'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

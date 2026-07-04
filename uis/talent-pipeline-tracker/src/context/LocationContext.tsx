@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo, useState } from 'react';
 
-export type LocationHub = 'Zaragoza' | 'Los Ángeles';
+export type LocationHub = 'Zaragoza' | 'Los Ángeles' | 'Todas';
 
 type LocationContextValue = {
   location: LocationHub;
@@ -12,7 +12,7 @@ type LocationContextValue = {
 const LocationContext = createContext<LocationContextValue | undefined>(undefined);
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
-  const [location, setLocation] = useState<LocationHub>('Zaragoza');
+  const [location, setLocation] = useState<LocationHub>('Todas');
 
   const value = useMemo(
     () => ({ location, setLocation }),

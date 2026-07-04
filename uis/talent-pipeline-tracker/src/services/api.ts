@@ -37,6 +37,7 @@ function normalizeStatus(status: string): CandidateStatus {
     case 'offered':
       return 'offered';
     case 'accepted':
+    case 'selected':
     case 'hired':
       return 'accepted';
     case 'rejected':
@@ -55,11 +56,15 @@ function normalizeStage(stage: string): CandidateStage {
     case 'technical':
     case 'review':
       return 'technical';
+    case 'technical_interview':
+      return 'manager';
     case 'cultural':
+    case 'personal_interview':
       return 'cultural';
     case 'manager':
       return 'manager';
     case 'final':
+    case 'offer_presented':
       return 'final';
     default:
       return 'screening';
@@ -130,8 +135,22 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export async function getRecords(): Promise<CandidateRecord[]> {
-  const response = await request<Omit<RecordsListResponse, 'data'> & { data: RawCandidateRecord[] }>('/records');
-  return response.data.map(normalizeCandidate);
+  const limit = 100;
+  const firstPage = await request<Omit<RecordsListResponse, 'data'> & { data: RawCandidateRecord[] }>(
+    '/records?limit=' + limit + '&page=1',
+  );
+
+  let allRecords = [...firstPage.data];
+  const totalPages = Math.max(1, Math.ceil(firstPage.total / limit));
+
+  for (let page = 2; page <= totalPages; page += 1) {
+    const response = await request<Omit<RecordsListResponse, 'data'> & { data: RawCandidateRecord[] }>(
+      '/records?limit=' + limit + '&page=' + page,
+    );
+    allRecords = allRecords.concat(response.data);
+  }
+
+  return allRecords.map(normalizeCandidate);
 }
 
 export async function getRecordById(id: string): Promise<CandidateRecord> {
@@ -168,9 +187,34 @@ export async function patchRecord(
     throw new Error('At least one field (status or stage) is required');
   }
 
+  const statusToApi: Record<CandidateStatus, string> = {
+    pending: 'received',
+    reviewing: 'in_progress',
+    interviewed: 'in_progress',
+    offered: 'selected',
+    rejected: 'discarded',
+    accepted: 'selected',
+  };
+
+  const stageToApi: Record<CandidateStage, string> = {
+    screening: 'pending',
+    technical: 'review',
+    cultural: 'personal_interview',
+    manager: 'technical_interview',
+    final: 'offer_presented',
+  };
+
+  const patchPayload: Record<string, string> = {};
+  if (payload.status) {
+    patchPayload.status = statusToApi[payload.status];
+  }
+  if (payload.stage) {
+    patchPayload.stage = stageToApi[payload.stage];
+  }
+
   const response = await request<RawCandidateRecord>('/records/' + id, {
     method: 'PATCH',
-    body: JSON.stringify(payload),
+    body: JSON.stringify(patchPayload),
   });
   return normalizeCandidate(response);
 }
