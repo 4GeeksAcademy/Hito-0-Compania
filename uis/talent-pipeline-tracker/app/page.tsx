@@ -681,8 +681,8 @@ export default function Page() {
           ) : null}
 
           <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm w-full max-w-full min-w-0">
-            <div className="overflow-x-auto hidden md:block">
-              <table className="w-full text-left border-collapse hidden md:table">
+            <div className="hidden xl:block overflow-x-auto">
+              <table className="hidden w-full min-w-[980px] border-collapse text-left xl:table">
                 <thead className="bg-surface-container-low border-b border-outline-variant">
                   <tr>
                     <th className="px-lg py-4 text-label-sm font-label-sm text-outline uppercase tracking-wider">{t.tableName}</th>
@@ -769,7 +769,7 @@ export default function Page() {
               </table>
             </div>
 
-            <div className="block md:hidden space-y-2 p-2">
+            <div className="block space-y-2 p-2 xl:hidden">
               {loading ? (
                 <div className="p-4 border border-gray-100 rounded-xl bg-white shadow-sm">
                   <div className="flex items-center gap-2 text-on-surface-variant">
