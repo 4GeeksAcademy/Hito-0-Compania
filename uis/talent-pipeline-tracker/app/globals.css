@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+@import "tailwindcss";
+
+:root {
+  --background: #f8f9ff;
+  --foreground: #0b1c30;
+}
+
+@theme inline {
+  --color-background: #f8f9ff;
+  --color-outline: #757682;
+  --color-on-primary: #ffffff;
+  --color-surface-bright: #f8f9ff;
+  --color-on-secondary: #ffffff;
+  --color-surface-container-low: #eff4ff;
+  --color-on-secondary-fixed-variant: #3f465c;
+  --color-primary-container: #1e3a8a;
+  --color-on-primary-container: #90a8ff;
+  --color-error: #ba1a1a;
+  --color-on-secondary-fixed: #131b2e;
+  --color-on-primary-fixed-variant: #264191;
+  --color-surface-tint: #4059aa;
+  --color-tertiary-fixed-dim: #ffb691;
+  --color-tertiary-container: #6e2c00;
+  --color-on-secondary-container: #5c647a;
+  --color-on-tertiary-container: #f39461;
+  --color-on-surface: #0b1c30;
+  --color-secondary: #565e74;
+  --color-surface-container-high: #dce9ff;
+  --color-surface-container: #e5eeff;
+  --color-on-tertiary-fixed-variant: #773205;
+  --color-on-error-container: #93000a;
+  --color-surface-dim: #cbdbf5;
+  --color-surface-container-highest: #d3e4fe;
+  --color-on-primary-fixed: #00164e;
+  --color-secondary-fixed: #dae2fd;
+  --color-inverse-on-surface: #eaf1ff;
+  --color-tertiary-fixed: #ffdbcb;
+  --color-outline-variant: #c5c5d3;
+  --color-primary-fixed-dim: #b6c4ff;
+  --color-surface-variant: #d3e4fe;
+  --color-primary: #00236f;
+  --color-on-surface-variant: #444651;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-secondary-fixed-dim: #bec6e0;
+  --color-inverse-primary: #b6c4ff;
+  --color-inverse-surface: #213145;
+  --color-surface: #f8f9ff;
+  --color-primary-fixed: #dce1ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-tertiary-fixed: #341100;
+  --color-on-background: #0b1c30;
+  --color-secondary-container: #dae2fd;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary: #4b1c00;
+
+  --spacing-xl: 2rem;
+  --spacing-sm: 0.5rem;
+  --spacing-xs: 0.25rem;
+  --spacing-margin-mobile: 1rem;
+  --spacing-md: 1rem;
+  --spacing-max-width: 1440px;
+  --spacing-base: 4px;
+  --spacing-lg: 1.5rem;
+  --spacing-gutter: 1.5rem;
+  --spacing-margin-desktop: 2rem;
+
+  --font-body-md: Inter, sans-serif;
+  --font-label-sm: Inter, sans-serif;
+  --font-label-md: Inter, sans-serif;
+  --font-headline-md: Inter, sans-serif;
+  --font-headline-lg-mobile: Inter, sans-serif;
+  --font-body-lg: Inter, sans-serif;
+  --font-title-lg: Inter, sans-serif;
+  --font-display-lg: Inter, sans-serif;
+  --font-headline-lg: Inter, sans-serif;
+
+  --text-body-md: 14px;
+  --text-label-sm: 11px;
+  --text-label-md: 12px;
+  --text-headline-md: 24px;
+  --text-headline-lg-mobile: 24px;
+  --text-body-lg: 16px;
+  --text-title-lg: 20px;
+  --text-display-lg: 48px;
+  --text-headline-lg: 32px;
+
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+  --radius-full: 0.75rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #f8f9ff;
+    --foreground: #0b1c30;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Inter, sans-serif;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'liga';
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}

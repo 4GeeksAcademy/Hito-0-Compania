@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TrackFlow Tech - Talent Pipeline Dashboard</title>
+<!-- Google Fonts: Inter & Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "background": "#f8f9ff",
+                    "outline": "#757682",
+                    "on-primary": "#ffffff",
+                    "surface-bright": "#f8f9ff",
+                    "on-secondary": "#ffffff",
+                    "surface-container-low": "#eff4ff",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "primary-container": "#1e3a8a",
+                    "on-primary-container": "#90a8ff",
+                    "error": "#ba1a1a",
+                    "on-secondary-fixed": "#131b2e",
+                    "on-primary-fixed-variant": "#264191",
+                    "surface-tint": "#4059aa",
+                    "tertiary-fixed-dim": "#ffb691",
+                    "tertiary-container": "#6e2c00",
+                    "on-secondary-container": "#5c647a",
+                    "on-tertiary-container": "#f39461",
+                    "on-surface": "#0b1c30",
+                    "secondary": "#565e74",
+                    "surface-container-high": "#dce9ff",
+                    "surface-container": "#e5eeff",
+                    "on-tertiary-fixed-variant": "#773205",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#cbdbf5",
+                    "surface-container-highest": "#d3e4fe",
+                    "on-primary-fixed": "#00164e",
+                    "secondary-fixed": "#dae2fd",
+                    "inverse-on-surface": "#eaf1ff",
+                    "tertiary-fixed": "#ffdbcb",
+                    "outline-variant": "#c5c5d3",
+                    "primary-fixed-dim": "#b6c4ff",
+                    "surface-variant": "#d3e4fe",
+                    "primary": "#00236f",
+                    "on-surface-variant": "#444651",
+                    "error-container": "#ffdad6",
+                    "on-error": "#ffffff",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "inverse-primary": "#b6c4ff",
+                    "inverse-surface": "#213145",
+                    "surface": "#f8f9ff",
+                    "primary-fixed": "#dce1ff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#341100",
+                    "on-background": "#0b1c30",
+                    "secondary-container": "#dae2fd",
+                    "on-tertiary": "#ffffff",
+                    "tertiary": "#4b1c00"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "xl": "2rem",
+                    "sm": "0.5rem",
+                    "xs": "0.25rem",
+                    "margin-mobile": "1rem",
+                    "md": "1rem",
+                    "max-width": "1440px",
+                    "base": "4px",
+                    "lg": "1.5rem",
+                    "gutter": "1.5rem",
+                    "margin-desktop": "2rem"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "title-lg": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "headline-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "label-sm": ["11px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "label-md": ["12px", {"lineHeight": "1.2", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "title-lg": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.25", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface flex min-h-screen">
+<!-- Sidebar Navigation -->
+<aside class="hidden md:flex flex-col h-screen fixed left-0 top-0 p-md gap-sm w-64 bg-surface-container-low border-r border-outline-variant z-20">
+<div class="flex items-center gap-sm px-sm py-md">
+<div class="w-8 h-8 flex items-center justify-center bg-primary rounded-lg">
+<img alt="TrackFlow Tech Logo" class="w-6 h-6 object-contain brightness-0 invert" src="https://lh3.googleusercontent.com/aida/AP1WRLuQnKTznPD7M2Ge0UAHUGS2bnE2YI3SsTXWqJ5e-op9_yLyrep3pKgqdJ0XCOI5ikEGfGspa6tqd-yp_aRubzuFbgjP4CAbfnTbJdhO82SFjvyy6ivaIy-hzNvlb7fIsumromyOd36CoBKHK2drazZZuDcySwwlBIWSo-w1wHg7EXfi2UeJeGn1yd18vWkzIlds8DTgP5zKB7DUgTuzdIdGCjuD4qbhwqGWbNB1SXDuMCOb-40aQTSGlmA"/>
+</div>
+<div>
+<h1 class="text-headline-md font-headline-md font-bold text-on-surface leading-tight">TrackFlow Tech</h1>
+<p class="text-label-md font-label-md text-on-surface-variant">Talent Pipeline</p>
+</div>
+</div>
+<nav class="flex-1 mt-md flex flex-col gap-xs">
+<!-- Active Tab: Candidates -->
+<a class="flex items-center gap-sm px-md py-sm hover:bg-surface-container-high transition-all active:scale-[0.98] text-on-surface-variant font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-label-md font-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm bg-primary-container text-on-primary-container rounded-xl transition-all active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-label-md font-label-md">Candidates</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm hover:bg-surface-container-high transition-all active:scale-[0.98] text-on-surface-variant font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="event_available">event_available</span>
+<span class="text-label-md font-label-md">Interviews</span>
+</a>
+<a class="flex items-center gap-sm px-md py-sm hover:bg-surface-container-high transition-all active:scale-[0.98] text-on-surface-variant font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="text-label-md font-label-md">Offers</span>
+</a>
+<div class="mt-auto">
+<a class="flex items-center gap-sm px-md py-sm hover:bg-surface-container-high transition-all active:scale-[0.98] text-on-surface-variant font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-label-md font-label-md">Settings</span>
+</a>
+</div>
+</nav>
+<div class="p-sm mt-md">
+<button class="w-full bg-primary-container text-on-primary-container py-3 rounded-xl font-bold flex items-center justify-center gap-sm hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                Post Job
+            </button>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="flex-1 md:ml-64 min-h-screen">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-margin-desktop h-16 max-w-max-width mx-auto bg-surface-container-lowest border-b border-outline-variant sticky top-0 z-10">
+<div class="flex items-center gap-xl h-full">
+<div class="flex items-center gap-md">
+<img alt="TrackFlow Icon" class="w-6 h-6" src="https://lh3.googleusercontent.com/aida/AP1WRLuQnKTznPD7M2Ge0UAHUGS2bnE2YI3SsTXWqJ5e-op9_yLyrep3pKgqdJ0XCOI5ikEGfGspa6tqd-yp_aRubzuFbgjP4CAbfnTbJdhO82SFjvyy6ivaIy-hzNvlb7fIsumromyOd36CoBKHK2drazZZuDcySwwlBIWSo-w1wHg7EXfi2UeJeGn1yd18vWkzIlds8DTgP5zKB7DUgTuzdIdGCjuD4qbhwqGWbNB1SXDuMCOb-40aQTSGlmA"/>
+<span class="text-title-lg font-title-lg font-black text-primary">TrackFlow Tech</span>
+</div>
+<nav class="hidden lg:flex items-center gap-lg h-full">
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors h-full flex items-center px-sm" href="#">Pipeline</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors h-full flex items-center px-sm" href="#">Analytics</a>
+<a class="text-primary border-b-2 border-primary pb-1 font-bold h-full flex items-center px-sm mt-[2px]" href="#">Positions</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors h-full flex items-center px-sm" href="#">Sourcing</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-xs px-sm py-1.5 bg-surface-container-low rounded-full cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="location_on">location_on</span>
+<select class="bg-transparent border-none text-label-md font-label-md focus:ring-0 cursor-pointer pr-8">
+<option>Zaragoza</option>
+<option>Los Angeles</option>
+<option>Global HQ</option>
+</select>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container cursor-pointer active:scale-95 transition-transform">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A professional headshot of a recruitment manager in a modern office environment, soft daylight coming from a large window, wearing a smart casual blazer, high-end commercial photography style, shallow depth of field, minimalist and clean aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWGZMtT76XMBgwRklhh9S68wuNAYfm3XGDQnxZOe4y5pN7mfjVbf4sJSViUTiuJl_TAreFkd3tYl2OtOd07nYlffzC9hnVA_Kxhp0K66p-25XjVeYUHHvhJkJlkCsGp6suRzYNvYJA1_VoPn-JWN120vgmoBnkWkWB7HB6yOfjQt3k6MZ15SBRK4HRicaa10qZZAf4d1Q8mihGqJPPZzB5-hy3A2JyFLHfxcjw1tvX1q71_qW7Iyd23-VBQT1naG2EXjrpNyZvkwM"/>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="px-margin-desktop py-xl max-w-max-width mx-auto">
+<!-- Main Action & Filter Bar -->
+<div class="bg-surface-container-lowest p-lg border border-outline-variant rounded-xl mb-xl">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-lg">
+<div class="flex flex-1 flex-col md:flex-row items-stretch md:items-center gap-md">
+<!-- Search Box -->
+<div class="relative flex-1 max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-white border border-outline-variant rounded-lg text-body-md focus:ring-2 focus:ring-primary focus:border-transparent transition-all" placeholder="Search by name or email..." type="text"/>
+</div>
+<!-- Dropdowns -->
+<div class="flex flex-wrap items-center gap-sm">
+<div class="flex items-center gap-xs">
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-wider">Status:</span>
+<select class="border border-outline-variant rounded-lg py-2 pl-3 pr-8 text-body-md bg-white focus:ring-2 focus:ring-primary">
+<option>All Statuses</option>
+<option>Pending</option>
+<option>Reviewing</option>
+<option>Interviewed</option>
+<option>Offered</option>
+<option>Rejected</option>
+<option>Accepted</option>
+</select>
+</div>
+<div class="flex items-center gap-xs">
+<span class="text-label-sm font-label-sm text-outline uppercase tracking-wider">Stage:</span>
+<select class="border border-outline-variant rounded-lg py-2 pl-3 pr-8 text-body-md bg-white focus:ring-2 focus:ring-primary">
+<option>All Stages</option>
+<option>Screening</option>
+<option>Technical</option>
+<option>Cultural</option>
+<option>Manager</option>
+<option>Final</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Primary Action -->
+<button class="bg-primary-container text-on-primary px-lg py-2.5 rounded-lg font-bold flex items-center justify-center gap-sm hover:bg-primary transition-colors active:scale-95 shadow-sm">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                        + New Candidate
+                    </button>
+</div>
+</div>
+<!-- Candidates Data Table Card -->
+<div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low border-b border-outline-variant">
+<tr>
+<th class="px-lg py-4 text-label-sm font-label-sm text-outline uppercase tracking-wider">Candidate Name</th>
+<th class="px-lg py-4 text-label-sm font-label-sm text-outline uppercase tracking-wider">Position</th>
+<th class="px-lg py-4 text-label-sm font-label-sm text-outline uppercase tracking-wider">Status</th>
+<th class="px-lg py-4 text-label-sm font-label-sm text-outline uppercase tracking-wider">Stage</th>
+<th class="px-lg py-4 text-label-sm font-label-sm text-outline uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1: John Doe -->
+<tr class="hover:bg-background transition-colors group cursor-pointer">
+<td class="px-lg py-4">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A closeup portrait of a smiling man with short hair and glasses, representing a professional and approachable warehouse operations manager. The lighting is clean and industrial-modern, with a slightly blurred office background in shades of light blue and white." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLG7b7M8tL8NMpCc4okx35qjFqMVumTsi6l6DRx8K2z0xvtg_RWJQTEennW9y0ZxNvkwGSdP-djUolueYyBYBZ2r55qEYP2PNyMI4Ywz_SnhVR0NjfwlQrjg4T1TTL73vqMrXHR9-5FIBKPm9N_UbXF9VbO9sDOXVXiXPQphkY2SaYbN9woW42jtiDMgmWy4p6AtQ4OihXyqWo4iIctBdODgfq7AIpqUgBvwiqYchLC2xJYcsT9SK79yLpar0TPI8sDuPqeP9_0Cw"/>
+</div>
+<div>
+<p class="text-body-md font-bold text-on-surface">John Doe</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">john.doe@logistics.com</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-4">
+<p class="text-body-md text-on-surface-variant font-medium">Warehouse Operator</p>
+<p class="text-label-sm font-label-sm text-outline">Los Angeles Hub</p>
+</td>
+<td class="px-lg py-4">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-orange-50 text-orange-700 border border-orange-100">
+                                        Reviewing
+                                    </span>
+</td>
+<td class="px-lg py-4">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-surface-container text-on-secondary-container border border-outline-variant">
+                                        Screening
+                                    </span>
+</td>
+<td class="px-lg py-4 text-right">
+<div class="flex items-center justify-end gap-md">
+<button class="text-primary font-bold text-label-md hover:underline">View Details</button>
+<button class="p-1 hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined text-outline" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Alejandro Martínez -->
+<tr class="hover:bg-background transition-colors group cursor-pointer">
+<td class="px-lg py-4">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A portrait of a Hispanic man with dark hair and a creative look, wearing a casual crewneck sweater. He looks focused yet friendly. The background is a bright, tech-savvy coworking space in Spain, with soft bokeh highlighting high-end development gear and warm wooden tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtutq0_ysBq7RNtyL44FSQoHO8tSrR0H5L7DKBcOovopZ84eOSpK4v3crn68JhLblIqlsmwjL_BtBX47UN4d3XNuWGOr2pi35dEbqw6vqhiZKhHfiDOYWLUSbTrGWpD3ohwxpk2JUyXxpBJ2-1aVTbKsC32LffaAz6bciIugyG24TeiNqlih7KEuv4v43ySQ_LVbrQ4Oodj6Fv7VQdmGXPi0Gl8ep3-8eM1W3_SHe_IafYtQVmo4I7o9ENnc11gn4__V09xiANrXc"/>
+</div>
+<div>
+<p class="text-body-md font-bold text-on-surface">Alejandro Martínez</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">a.martinez@techflow.es</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-4">
+<p class="text-body-md text-on-surface-variant font-medium">Fullstack Developer</p>
+<p class="text-label-sm font-label-sm text-outline">TrackFlow Tech (Zaragoza)</p>
+</td>
+<td class="px-lg py-4">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-green-50 text-green-700 border border-green-100">
+                                        Interviewed
+                                    </span>
+</td>
+<td class="px-lg py-4">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-primary-container/10 text-primary-container border border-primary-container/20">
+                                        Technical
+                                    </span>
+</td>
+<td class="px-lg py-4 text-right">
+<div class="flex items-center justify-end gap-md">
+<button class="text-primary font-bold text-label-md hover:underline">View Details</button>
+<button class="p-1 hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined text-outline" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Sarah Jenkins -->
+<tr class="hover:bg-background transition-colors group cursor-pointer">
+<td class="px-lg py-4">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close up professional photo of a young woman with blonde hair, wearing a sleek headset, smiling warmly. She embodies high-quality customer service professionalism. The aesthetic is clean corporate modern, with a bright white and soft blue color palette and sharp, vibrant clarity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdW5m_divZytNewkEJd-wIz04cEJYWBjq6IotsAzabyx-HRmVSXkT_zlcWYDPnooyd6v39paExrRjsusfbIaxu5X8uqch7gj_lQKPSwZ_fHGN1MK9-DWhTZjwX0FBwtKXOobUbifzZ-wGq0JZwl5uVP8PBEOf8VU3gzSVWeDRY81shzo6iEMJuG6q3Xal8hGEYWbLFuS9XTeyGHdm2em3o84MerUmHtJ7Vj3fJiMgUHC2r70DUPP5Rp79O1hzEBbSA7kyHfE_MmYY"/>
+</div>
+<div>
+<p class="text-body-md font-bold text-on-surface">Sarah Jenkins</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant">s.jenkins@clientcare.com</p>
+</div>
+</div>
+</td>
+<td class="px-lg py-4">
+<p class="text-body-md text-on-surface-variant font-medium">Customer Service Agent</p>
+<p class="text-label-sm font-label-sm text-outline">Los Angeles</p>
+</td>
+<td class="px-lg py-4">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                        Offered
+                                    </span>
+</td>
+<td class="px-lg py-4">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md bg-teal-50 text-teal-700 border border-teal-100">
+                                        Final
+                                    </span>
+</td>
+<td class="px-lg py-4 text-right">
+<div class="flex items-center justify-end gap-md">
+<button class="text-primary font-bold text-label-md hover:underline">View Details</button>
+<button class="p-1 hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined text-outline" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="bg-surface-container-low px-lg py-3 flex items-center justify-between border-t border-outline-variant">
+<p class="text-label-sm font-label-sm text-on-surface-variant">Showing 3 of 124 candidates</p>
+<div class="flex items-center gap-sm">
+<button class="p-1 rounded border border-outline-variant disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[20px]" data-icon="chevron_left">chevron_left</span>
+</button>
+<span class="text-label-sm font-label-sm px-2">Page 1 of 42</span>
+<button class="p-1 rounded border border-outline-variant hover:bg-white transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Dashboard Stats Bento Grid (Bonus high-end UI elements) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg mt-xl">
+<div class="bg-white border border-outline-variant p-lg rounded-xl flex items-center justify-between shadow-sm">
+<div>
+<p class="text-label-sm font-label-sm text-outline uppercase tracking-wider mb-1">Active Positions</p>
+<h3 class="text-headline-md font-bold text-primary">12</h3>
+<p class="text-label-sm font-label-sm text-green-600 mt-1">+2 from last month</p>
+</div>
+<div class="w-12 h-12 bg-primary-container/10 rounded-full flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[28px]" data-icon="work">work</span>
+</div>
+</div>
+<div class="bg-white border border-outline-variant p-lg rounded-xl flex items-center justify-between shadow-sm">
+<div>
+<p class="text-label-sm font-label-sm text-outline uppercase tracking-wider mb-1">Pending Interviews</p>
+<h3 class="text-headline-md font-bold text-primary">28</h3>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-1">Scheduled this week</p>
+</div>
+<div class="w-12 h-12 bg-surface-container-high rounded-full flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-[28px]" data-icon="schedule">schedule</span>
+</div>
+</div>
+<div class="bg-white border border-outline-variant p-lg rounded-xl flex items-center justify-between shadow-sm">
+<div>
+<p class="text-label-sm font-label-sm text-outline uppercase tracking-wider mb-1">Offer Acceptance</p>
+<h3 class="text-headline-md font-bold text-primary">94%</h3>
+<p class="text-label-sm font-label-sm text-green-600 mt-1">Above target goal</p>
+</div>
+<div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-green-600">
+<span class="material-symbols-outlined text-[28px]" data-icon="trending_up">trending_up</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Micro-interactions Script -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Table row click simulation
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                row.addEventListener('click', (e) => {
+                    // Prevent action buttons from triggering row click
+                    if(e.target.closest('button')) return;
+                    console.log('Opening candidate details...');
+                });
+            });
+
+            // Active scale simulation for dropdowns
+            const selects = document.querySelectorAll('select');
+            selects.forEach(select => {
+                select.addEventListener('mousedown', () => {
+                    select.classList.add('scale-[0.99]');
+                });
+                select.addEventListener('mouseup', () => {
+                    select.classList.remove('scale-[0.99]');
+                });
+            });
+        });
+    </script>
+</body></html>
