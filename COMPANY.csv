@@ -1,0 +1,104 @@
+incident_id,created_at,country,customer_id,customer_email,customer_phone,category,status,priority,resolution_hours,channel,description,satisfaction_score
+INC-0001,2026-08-10,ES,CUST-1,ana@example.com,+34 600 000 001,queja,cerrado,media,12,email,Entrega tardia,4
+INC-0002,2026-08-11,US,CUST-2,bob@example.com,+1-213-555-1002,solicitud,abierto,baja,,web,Cambio de direccion,
+INC-0003,2026-08-12,ES,CUST-3,correo-invalido,+34 600 000 003,fallo_operativo,resuelto,alta,6,chat,Fallo en tracking,5
+INC-00004,2026-01-01,US,TF-CUST-2004,correo-invalido,+1-213-555-1004,queja,abierto,baja,,email,Incidencia queja en operacion Los Angeles: entrega tardia,
+INC-00005,2026-02-04,ES,TF-CUST-2005,cliente5@trackflow.com,+34 600 005 005,solicitud,en_proceso,media,,telefono,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,
+INC-00006,2026-03-07,US,TF-CUST-2006,cliente6@trackflow.com,+1-213-555-1006,fallo_operativo,resuelto,alta,10.0,web,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,3
+INC-00007,2026-04-10,ES,TF-CUST-2007,cliente7@trackflow.com,+34 600 007 007,queja,cerrado,critica,11.0,chat,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00008,2026-05-13,US,TF-CUST-2008,cliente8@trackflow.com,+1-213-555-1008,solicitud,descartado,baja,,email,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,
+INC-00009,2026-06-16,ES,TF-CUST-2009,cliente9@trackflow.com,+34 600 009 009,fallo_operativo,abierto,media,,telefono,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,
+INC-00010,2026-07-19,FR,TF-CUST-2010,cliente10@trackflow.com,+1-213-555-1010,queja,en_proceso,alta,,web,Incidencia queja en operacion Los Angeles: entrega tardia,
+INC-00011,2026-08-22,ES,TF-CUST-2011,cliente11@trackflow.com,+34 600 011 011,solicitud,resuelto,critica,15.0,chat,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,3
+INC-00012,2026-09-25,US,TF-CUST-2012,cliente12@trackflow.com,+1-213-555-1012,fallo_operativo,cerrado,baja,16.0,email,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,4
+INC-00013,2026-01-28,ES,TF-CUST-2013,cliente13@trackflow.com,+34 600 013 013,queja,descartado,media,,telefono,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00014,2026-02-03,US,TF-CUST-2014,cliente14@trackflow.com,+1-213-555-1014,solicitud,abierto,alta,,web,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,
+INC-00015,2026-03-06,ES,TF-CUST-2015,cliente15@trackflow.com,+34 600 015 015,fallo_operativo,en_proceso,critica,,chat,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,
+INC-00016,2026-04-09,US,TF-CUST-2016,cliente16@trackflow.com,+1-213-555-1016,queja,pendiente,baja,20.0,email,Incidencia queja en operacion Los Angeles: entrega tardia,
+INC-00017,2026-05-12,ES,TF-CUST-2017,cliente17@trackflow.com,+34 600 017 017,solicitud,cerrado,media,21.0,telefono,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,4
+INC-00018,2026-06-15,US,TF-CUST-2018,cliente18@trackflow.com,+1-213-555-1018,fallo_operativo,descartado,alta,,web,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,
+INC-00019,2026-07-18,ES,TF-CUST-2019,cliente19@trackflow.com,+34 600 019 019,queja,abierto,critica,,chat,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00020,2026-08-21,US,TF-CUST-2020,cliente20@trackflow.com,+1-213-555-1020,solicitud,en_proceso,baja,,email,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,
+INC-00021,2026-09-24,ES,TF-CUST-2021,cliente21@trackflow.com,+34 600 021 021,fallo_operativo,resuelto,media,25.0,telefono,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,3
+INC-00022,2026-01-27,US,TF-CUST-2022,cliente22@trackflow.com,+1-213-555-1022,reclamacion,cerrado,alta,26.0,web,Incidencia queja en operacion Los Angeles: entrega tardia,
+INC-00023,2026-02-02,ES,TF-CUST-2023,cliente23@trackflow.com,+34 600 023 023,solicitud,descartado,critica,,chat,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,
+INC-00024,2026-03-05,US,TF-CUST-2024,cliente24@trackflow.com,+1-213-555-1024,fallo_operativo,abierto,baja,,email,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,
+INC-00025,2026-04-08,ES,TF-CUST-2025,cliente25@trackflow.com,+34 600 025 025,queja,en_proceso,media,,telefono,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00026,2026-05-11,US,TF-CUST-2026,cliente26@trackflow.com,+1-213-555-1026,solicitud,resuelto,alta,30.0,web,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,3
+INC-00027,2026-06-14,ES,TF-CUST-2027,cliente27@trackflow.com,+34 600 027 027,fallo_operativo,cerrado,critica,31.0,chat,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,4
+INC-00028,2026-07-17,US,TF-CUST-2028,cliente28@trackflow.com,+1-213-555-1028,queja,descartado,baja,-4,email,Incidencia queja en operacion Los Angeles: entrega tardia,
+INC-00029,2026-08-20,ES,TF-CUST-2029,cliente29@trackflow.com,+34 600 029 029,solicitud,abierto,media,,telefono,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,
+INC-00030,2026-09-23,US,TF-CUST-2030,cliente30@trackflow.com,+1-213-555-1030,fallo_operativo,en_proceso,alta,,web,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,
+INC-00031,2026-01-26,ES,TF-CUST-2031,cliente31@trackflow.com,+34 600 031 031,queja,resuelto,critica,35.0,chat,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00032,2026-02-01,US,TF-CUST-2032,cliente32@trackflow.com,+1-213-555-1032,solicitud,cerrado,baja,36.0,email,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,4
+INC-00033,2026-03-04,ES,TF-CUST-2033,cliente33@trackflow.com,+34 600 033 033,fallo_operativo,descartado,media,,telefono,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,
+INC-00034,2026-04-07,US,TF-CUST-2034,cliente34@trackflow.com,12,queja,abierto,alta,,web,Incidencia queja en operacion Los Angeles: entrega tardia,
+INC-00035,2026-05-10,ES,TF-CUST-2035,cliente35@trackflow.com,+34 600 035 035,solicitud,en_proceso,critica,,chat,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,
+INC-00036,2026-06-13,US,TF-CUST-2036,cliente36@trackflow.com,+1-213-555-1036,fallo_operativo,resuelto,baja,40.0,email,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,3
+INC-00037,2026-07-16,ES,TF-CUST-2037,cliente37@trackflow.com,+34 600 037 037,queja,cerrado,media,41.0,telefono,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00038,2026-08-19,US,TF-CUST-2038,cliente38@trackflow.com,+1-213-555-1038,solicitud,descartado,alta,,web,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,
+INC-00039,2026-09-22,ES,TF-CUST-2039,cliente39@trackflow.com,+34 600 039 039,fallo_operativo,abierto,critica,,chat,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,
+INC-00040,2026-01-25,US,TF-CUST-2040,cliente40@trackflow.com,+1-213-555-1040,queja,en_proceso,baja,,email,,
+INC-00041,2026-02-28,ES,TF-CUST-2041,cliente41@trackflow.com,+34 600 041 041,solicitud,resuelto,media,45.0,telefono,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,3
+INC-00042,2026-03-03,US,TF-CUST-2042,cliente42@trackflow.com,+1-213-555-1042,fallo_operativo,cerrado,alta,46.0,web,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,4
+INC-00043,2026-04-06,ES,TF-CUST-2043,cliente43@trackflow.com,+34 600 043 043,queja,descartado,critica,,chat,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00044,2026-05-09,US,TF-CUST-2044,cliente44@trackflow.com,+1-213-555-1044,solicitud,abierto,baja,,email,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,
+INC-00045,2026-06-12,ES,TF-CUST-2045,cliente45@trackflow.com,+34 600 045 045,fallo_operativo,en_proceso,media,,telefono,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,
+INC-00046,2026-07-15,US,TF-CUST-2046,cliente46@trackflow.com,+1-213-555-1046,queja,resuelto,alta,50.0,web,Incidencia queja en operacion Los Angeles: entrega tardia,7
+INC-00047,2026-08-18,ES,TF-CUST-2047,cliente47@trackflow.com,+34 600 047 047,solicitud,cerrado,critica,51.0,chat,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,4
+INC-00048,2026-09-21,US,TF-CUST-2048,cliente48@trackflow.com,+1-213-555-1048,fallo_operativo,descartado,baja,,email,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,
+INC-00049,2026-01-24,ES,TF-CUST-2049,cliente49@trackflow.com,+34 600 049 049,queja,abierto,media,,telefono,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00050,2026-02-27,US,TF-CUST-2050,cliente50@trackflow.com,+1-213-555-1050,solicitud,en_proceso,alta,,web,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,
+INC-00051,2026-03-02,ES,TF-CUST-2051,cliente51@trackflow.com,+34 600 051 051,fallo_operativo,resuelto,critica,55.0,chat,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,3
+INC-00052,2026-04-05,US,TF-CUST-2052,correo-invalido,+1-213-555-1052,queja,cerrado,baja,56.0,email,Incidencia queja en operacion Los Angeles: entrega tardia,
+INC-00053,2026-05-08,ES,TF-CUST-2053,cliente53@trackflow.com,+34 600 053 053,solicitud,descartado,media,,telefono,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,
+INC-00054,2026-06-11,US,TF-CUST-2054,cliente54@trackflow.com,+1-213-555-1054,fallo_operativo,abierto,alta,,web,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,
+INC-00055,2026-07-14,ES,TF-CUST-2055,cliente55@trackflow.com,+34 600 055 055,queja,en_proceso,critica,,chat,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00056,2026-08-17,US,TF-CUST-2056,cliente56@trackflow.com,+1-213-555-1056,solicitud,resuelto,baja,60.0,email,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,3
+INC-00057,2026-09-20,ES,TF-CUST-2057,cliente57@trackflow.com,+34 600 057 057,fallo_operativo,cerrado,media,61.0,telefono,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,4
+INC-00058,2026-01-23,FR,TF-CUST-2058,cliente58@trackflow.com,+1-213-555-1058,queja,descartado,alta,,web,Incidencia queja en operacion Los Angeles: entrega tardia,
+INC-00059,2026-02-26,ES,TF-CUST-2059,cliente59@trackflow.com,+34 600 059 059,solicitud,abierto,critica,,chat,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,
+INC-00060,2026-03-01,US,TF-CUST-2060,cliente60@trackflow.com,+1-213-555-1060,fallo_operativo,en_proceso,baja,,email,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,
+INC-00061,2026-04-04,ES,TF-CUST-2061,cliente61@trackflow.com,+34 600 061 061,queja,resuelto,media,65.0,telefono,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00062,2026-05-07,US,TF-CUST-2062,cliente62@trackflow.com,+1-213-555-1062,solicitud,cerrado,alta,66.0,web,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,4
+INC-00063,2026-06-10,ES,TF-CUST-2063,cliente63@trackflow.com,+34 600 063 063,fallo_operativo,descartado,critica,,chat,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,
+INC-00064,2026-07-13,US,TF-CUST-2064,cliente64@trackflow.com,+1-213-555-1064,queja,pendiente,baja,,email,Incidencia queja en operacion Los Angeles: entrega tardia,
+INC-00065,2026-08-16,ES,TF-CUST-2065,cliente65@trackflow.com,+34 600 065 065,solicitud,en_proceso,media,,telefono,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,
+INC-00066,2026-09-19,US,TF-CUST-2066,cliente66@trackflow.com,+1-213-555-1066,fallo_operativo,resuelto,alta,10.0,web,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,3
+INC-00067,2026-01-22,ES,TF-CUST-2067,cliente67@trackflow.com,+34 600 067 067,queja,cerrado,critica,11.0,chat,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00068,2026-02-25,US,TF-CUST-2068,cliente68@trackflow.com,+1-213-555-1068,solicitud,descartado,baja,,email,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,
+INC-00069,2026-03-28,ES,TF-CUST-2069,cliente69@trackflow.com,+34 600 069 069,fallo_operativo,abierto,media,,telefono,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,
+INC-00070,2026-04-03,US,TF-CUST-2070,cliente70@trackflow.com,+1-213-555-1070,reclamacion,en_proceso,alta,,web,Incidencia queja en operacion Los Angeles: entrega tardia,
+INC-00071,2026-05-06,ES,TF-CUST-2071,cliente71@trackflow.com,+34 600 071 071,solicitud,resuelto,critica,15.0,chat,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,3
+INC-00072,2026-06-09,US,TF-CUST-2072,cliente72@trackflow.com,+1-213-555-1072,fallo_operativo,cerrado,baja,16.0,email,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,4
+INC-00073,2026-07-12,ES,TF-CUST-2073,cliente73@trackflow.com,+34 600 073 073,queja,descartado,media,,telefono,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00074,2026-08-15,US,TF-CUST-2074,cliente74@trackflow.com,+1-213-555-1074,solicitud,abierto,alta,,web,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,
+INC-00075,2026-09-18,ES,TF-CUST-2075,cliente75@trackflow.com,+34 600 075 075,fallo_operativo,en_proceso,critica,,chat,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,
+INC-00076,2026-01-21,US,TF-CUST-2076,cliente76@trackflow.com,+1-213-555-1076,queja,resuelto,baja,-4,email,Incidencia queja en operacion Los Angeles: entrega tardia,
+INC-00077,2026-02-24,ES,TF-CUST-2077,cliente77@trackflow.com,+34 600 077 077,solicitud,cerrado,media,21.0,telefono,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,4
+INC-00078,2026-03-27,US,TF-CUST-2078,cliente78@trackflow.com,+1-213-555-1078,fallo_operativo,descartado,alta,,web,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,
+INC-00079,2026-04-02,ES,TF-CUST-2079,cliente79@trackflow.com,+34 600 079 079,queja,abierto,critica,,chat,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00080,2026-05-05,US,TF-CUST-2080,cliente80@trackflow.com,+1-213-555-1080,solicitud,en_proceso,baja,,email,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,
+INC-00081,2026-06-08,ES,TF-CUST-2081,cliente81@trackflow.com,+34 600 081 081,fallo_operativo,resuelto,media,25.0,telefono,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,3
+INC-00082,2026-07-11,US,TF-CUST-2082,cliente82@trackflow.com,12,queja,cerrado,alta,26.0,web,Incidencia queja en operacion Los Angeles: entrega tardia,
+INC-00083,2026-08-14,ES,TF-CUST-2083,cliente83@trackflow.com,+34 600 083 083,solicitud,descartado,critica,,chat,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,
+INC-00084,2026-09-17,US,TF-CUST-2084,cliente84@trackflow.com,+1-213-555-1084,fallo_operativo,abierto,baja,,email,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,
+INC-00085,2026-01-20,ES,TF-CUST-2085,cliente85@trackflow.com,+34 600 085 085,queja,en_proceso,media,,telefono,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00086,2026-02-23,US,TF-CUST-2086,cliente86@trackflow.com,+1-213-555-1086,solicitud,resuelto,alta,30.0,web,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,3
+INC-00087,2026-03-26,ES,TF-CUST-2087,cliente87@trackflow.com,+34 600 087 087,fallo_operativo,cerrado,critica,31.0,chat,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,4
+INC-00088,2026-04-01,US,TF-CUST-2088,cliente88@trackflow.com,+1-213-555-1088,queja,descartado,baja,,email,,
+INC-00089,2026-05-04,ES,TF-CUST-2089,cliente89@trackflow.com,+34 600 089 089,solicitud,abierto,media,,telefono,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,
+INC-00090,2026-06-07,US,TF-CUST-2090,cliente90@trackflow.com,+1-213-555-1090,fallo_operativo,en_proceso,alta,,web,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,
+INC-00091,2026-07-10,ES,TF-CUST-2091,cliente91@trackflow.com,+34 600 091 091,queja,resuelto,critica,35.0,chat,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00092,2026-08-13,US,TF-CUST-2092,cliente92@trackflow.com,+1-213-555-1092,solicitud,cerrado,baja,36.0,email,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,4
+INC-00093,2026-09-16,ES,TF-CUST-2093,cliente93@trackflow.com,+34 600 093 093,fallo_operativo,descartado,media,,telefono,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,
+INC-00094,2026-01-19,US,TF-CUST-2094,cliente94@trackflow.com,+1-213-555-1094,queja,abierto,alta,,web,Incidencia queja en operacion Los Angeles: entrega tardia,7
+INC-00095,2026-02-22,ES,TF-CUST-2095,cliente95@trackflow.com,+34 600 095 095,solicitud,en_proceso,critica,,chat,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,
+INC-00096,2026-03-25,US,TF-CUST-2096,cliente96@trackflow.com,+1-213-555-1096,fallo_operativo,resuelto,baja,40.0,email,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,3
+INC-00097,2026-04-28,ES,TF-CUST-2097,cliente97@trackflow.com,+34 600 097 097,queja,cerrado,media,41.0,telefono,Incidencia queja en operacion Zaragoza: entrega tardia,
+INC-00098,2026-05-03,US,TF-CUST-2098,cliente98@trackflow.com,+1-213-555-1098,solicitud,descartado,alta,,web,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,
+INC-00099,2026-06-06,ES,TF-CUST-2099,cliente99@trackflow.com,+34 600 099 099,fallo_operativo,abierto,critica,,chat,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,
+INC-00100,2026-07-09,US,TF-CUST-2100,correo-invalido,+1-213-555-1100,queja,en_proceso,baja,,email,Incidencia queja en operacion Los Angeles: entrega tardia,
+INC-00101,2026-08-12,ES,TF-CUST-2101,cliente101@trackflow.com,+34 600 101 101,solicitud,resuelto,media,45.0,telefono,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,3
+INC-00102,2026-09-15,US,TF-CUST-2102,cliente102@trackflow.com,+1-213-555-1102,fallo_operativo,cerrado,alta,46.0,web,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,4
+INC-00103,2026-01-18,ES,TF-CUST-2103,cliente103@trackflow.com,+34 600 103 103,queja,descartado,critica,,chat,Incidencia queja en operacion Zaragoza: entrega tardia,
