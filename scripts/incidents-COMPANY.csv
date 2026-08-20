@@ -99,6 +99,3 @@ INC-00097,2026-04-28,ES,TF-CUST-2097,cliente97@trackflow.com,+34 600 097 097,que
 INC-00098,2026-05-03,US,TF-CUST-2098,cliente98@trackflow.com,+1-213-555-1098,solicitud,descartado,alta,,web,Incidencia solicitud en operacion Los Angeles: consulta de seguimiento,
 INC-00099,2026-06-06,ES,TF-CUST-2099,cliente99@trackflow.com,+34 600 099 099,fallo_operativo,abierto,critica,,chat,Incidencia fallo_operativo en operacion Zaragoza: error de trazabilidad,
 INC-00100,2026-07-09,US,TF-CUST-2100,correo-invalido,+1-213-555-1100,queja,en_proceso,baja,,email,Incidencia queja en operacion Los Angeles: entrega tardia,
-INC-00101,2026-08-12,ES,TF-CUST-2101,cliente101@trackflow.com,+34 600 101 101,solicitud,resuelto,media,45.0,telefono,Incidencia solicitud en operacion Zaragoza: consulta de seguimiento,3
-INC-00102,2026-09-15,US,TF-CUST-2102,cliente102@trackflow.com,+1-213-555-1102,fallo_operativo,cerrado,alta,46.0,web,Incidencia fallo_operativo en operacion Los Angeles: error de trazabilidad,4
-INC-00103,2026-01-18,ES,TF-CUST-2103,cliente103@trackflow.com,+34 600 103 103,queja,descartado,critica,,chat,Incidencia queja en operacion Zaragoza: entrega tardia,
