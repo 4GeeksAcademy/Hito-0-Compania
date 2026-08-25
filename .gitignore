@@ -1,0 +1,24 @@
+# === Secrets ===
+.env
+
+# === Dependencias ===
+node_modules/
+.venv/
+
+# === Caché Python ===
+__pycache__/
+*.pyc
+*.pyo
+
+# === Datos locales ===
+data/db.json
+
+# === Editor ===
+.vscode/
+*.swp
+*.swo
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
