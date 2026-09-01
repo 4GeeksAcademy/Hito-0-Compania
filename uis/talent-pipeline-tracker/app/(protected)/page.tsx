@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import FeedbackAlert from '@/src/components/FeedbackAlert';
 import { trackerApi } from '@/services/api';
+import { useAuth } from '@/src/context/AuthContext';
 import { useLocation } from '@/src/context/LocationContext';
 import type { LocationHub } from '@/src/context/LocationContext';
 import type { CandidateInput, CandidateRecord, CandidateStage, CandidateStatus } from '@/src/types/tracker';
@@ -250,6 +251,7 @@ export default function Page() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { location, setLocation } = useLocation();
+  const { logout } = useAuth();
 
   const [locale, setLocale] = useState<Locale>('es');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -613,6 +615,13 @@ export default function Page() {
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWGZMtT76XMBgwRklhh9S68wuNAYfm3XGDQnxZOe4y5pN7mfjVbf4sJSViUTiuJl_TAreFkd3tYl2OtOd07nYlffzC9hnVA_Kxhp0K66p-25XjVeYUHHvhJkJlkCsGp6suRzYNvYJA1_VoPn-JWN120vgmoBnkWkWB7HB6yOfjQt3k6MZ15SBRK4HRicaa10qZZAf4d1Q8mihGqJPPZzB5-hy3A2JyFLHfxcjw1tvX1q71_qW7Iyd23-VBQT1naG2EXjrpNyZvkwM"
               />
             </div>
+            <button
+              type="button"
+              onClick={logout}
+              className="h-9 rounded-full border border-outline-variant bg-white px-3 text-label-md font-semibold text-red-600 hover:bg-red-50 transition-colors"
+            >
+              Cerrar sesión
+            </button>
           </div>
         </header>
 

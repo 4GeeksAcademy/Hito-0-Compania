@@ -8,6 +8,33 @@
 
 const STORAGE_KEY = 'auth_token';
 
+/* ──────────────────── Resolución dinámica de la API base ────── */
+
+/**
+ * Calcula la URL base de la API en tiempo de ejecución (navegador),
+ * para que funcione tanto en localhost como en un Codespace con
+ * puertos reenviados por *.app.github.dev, donde "localhost" en el
+ * bundle apuntaría a la máquina del usuario en vez del contenedor.
+ */
+export function resolveApiBase(): string {
+  if (typeof window === 'undefined') {
+    return process.env.NEXT_PUBLIC_AUTH_API_URL?.replace(/\/$/, '') ?? '';
+  }
+
+  const { protocol, hostname } = window.location;
+
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `${protocol}//${hostname}:8000`;
+  }
+
+  if (hostname.endsWith('.app.github.dev')) {
+    const apiHost = hostname.replace(/-\d+\.app\.github\.dev$/, '-8000.app.github.dev');
+    return `${protocol}//${apiHost}`;
+  }
+
+  return process.env.NEXT_PUBLIC_AUTH_API_URL?.replace(/\/$/, '') ?? '';
+}
+
 /* ──────────────────── Token helpers ─────────────────────────── */
 
 export function getStoredToken(): string | null {

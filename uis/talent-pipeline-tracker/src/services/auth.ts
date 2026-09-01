@@ -21,11 +21,9 @@ import {
   checkUnauthorized,
   clearToken,
   getStoredToken,
+  resolveApiBase,
   storeToken,
 } from './http-client';
-
-const AUTH_API_BASE_URL =
-  process.env.NEXT_PUBLIC_AUTH_API_URL?.replace(/\/$/, '') ?? '';
 
 /* ──────────────────── Error con validación por campo ─────────── */
 
@@ -122,7 +120,7 @@ async function request<T>(
     headers['Authorization'] = `Bearer ${options.token}`;
   }
 
-  const response = await fetch(`${AUTH_API_BASE_URL}${path}`, {
+  const response = await fetch(`${resolveApiBase()}${path}`, {
     ...options,
     headers: { ...headers, ...(options.headers as Record<string, string> ?? {}) },
   });

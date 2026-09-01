@@ -122,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const user = await getCurrentUser(tokens.access_token);
         dispatch({ type: 'SET_USER', payload: user });
-        router.push('/profile');
+        router.push('/');
       } catch (err) {
         if (err instanceof ValidationError) {
           dispatch({ type: 'SET_FIELD_ERRORS', payload: err.fieldErrors });
@@ -148,7 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const user = await getCurrentUser(tokens.access_token);
         dispatch({ type: 'SET_USER', payload: user });
-        router.push('/profile');
+        router.push('/');
       } catch (err) {
         if (err instanceof ValidationError) {
           dispatch({ type: 'SET_FIELD_ERRORS', payload: err.fieldErrors });
