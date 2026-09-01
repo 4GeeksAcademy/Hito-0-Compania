@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Backoffice | Directorio de Proveedores</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand-wrap">
+        <p class="eyebrow">TrackFlow Tech</p>
+        <h1>Backoffice de Proveedores</h1>
+      </div>
+      <nav class="menu" aria-label="Menu de aplicacion">
+        <a href="../../index.html">Inicio</a>
+        <a href="../../application.html">Solicitud</a>
+        <a class="active" href="index.html">Backoffice</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <section class="panel">
+        <h2>Filtros</h2>
+        <div class="filters">
+          <label>
+            Pais
+            <select id="country-filter">
+              <option value="">Todos</option>
+              <option value="USA">USA</option>
+              <option value="Spain">Spain</option>
+            </select>
+          </label>
+          <label>
+            Categoria
+            <select id="category-filter"></select>
+          </label>
+          <button id="refresh-btn" type="button">Actualizar listado</button>
+        </div>
+        <p id="list-feedback" class="feedback" aria-live="polite"></p>
+      </section>
+
+      <section class="panel">
+        <h2>Registrar proveedor</h2>
+        <form id="supplier-form" class="supplier-form" novalidate>
+          <div class="grid-2">
+            <label>
+              Nombre
+              <input required name="name" type="text" />
+            </label>
+            <label>
+              Pais
+              <select required name="country" id="country-input">
+                <option value="USA">USA</option>
+                <option value="Spain">Spain</option>
+              </select>
+            </label>
+            <label>
+              Moneda
+              <input name="currency" id="currency-input" type="text" value="USD" readonly />
+            </label>
+            <label>
+              Tarifa por envio
+              <input required name="rate_per_shipment" type="number" min="0.01" step="0.01" />
+            </label>
+            <label>
+              Estado
+              <select required name="status">
+                <option value="active">active</option>
+                <option value="suspended">suspended</option>
+              </select>
+            </label>
+            <label>
+              Zona de servicio
+              <input name="service_zone" type="text" />
+            </label>
+            <label>
+              Email de contacto
+              <input name="contact_email" type="email" />
+            </label>
+            <label>
+              Notas
+              <input name="notes" type="text" />
+            </label>
+          </div>
+
+          <p class="feedback">La categoria del proveedor se toma del filtro superior.</p>
+
+          <button type="submit" class="create-provider-btn">Crear proveedor</button>
+          <p id="form-feedback" class="feedback" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="panel panel-table">
+        <h2>Directorio</h2>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Pais</th>
+                <th>Categorias</th>
+                <th>Tarifa</th>
+                <th>Moneda</th>
+                <th>Estado</th>
+                <th>Zona de servicio</th>
+                <th>Email de contacto</th>
+                <th>Notas</th>
+                <th>Ult. actualizacion</th>
+                <th>Actualizar tarifa</th>
+                <th>Cambiar estado</th>
+              </tr>
+            </thead>
+            <tbody id="suppliers-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,57 @@
+{
+  "totals": {
+    "total_rows": 103,
+    "valid_rows": 85,
+    "invalid_rows": 18,
+    "error_count": 18
+  },
+  "breakdowns": {
+    "by_category": {
+      "queja": 18,
+      "solicitud": 34,
+      "fallo_operativo": 33
+    },
+    "by_status": {
+      "cerrado": 18,
+      "abierto": 17,
+      "en_proceso": 16,
+      "resuelto": 17,
+      "descartado": 17
+    },
+    "by_country": {
+      "ES": 51,
+      "US": 34
+    },
+    "by_priority": {
+      "media": 26,
+      "baja": 17,
+      "alta": 17,
+      "critica": 25
+    },
+    "by_channel": {
+      "email": 17,
+      "web": 18,
+      "telefono": 25,
+      "chat": 25
+    },
+    "invalid_by_rule": {
+      "invalid_email": 4,
+      "invalid_country": 2,
+      "invalid_status": 2,
+      "invalid_category": 2,
+      "negative_resolution_hours": 2,
+      "invalid_phone": 2,
+      "required": 2,
+      "satisfaction_score_out_of_range": 2
+    }
+  },
+  "kpis": {
+    "avg_resolution_hours": 33.54,
+    "avg_resolution_hours_by_category": {
+      "queja": 31.38,
+      "solicitud": 36.23,
+      "fallo_operativo": 32.29
+    },
+    "avg_satisfaction_closed": 3.5
+  }
+}
