@@ -5,12 +5,18 @@ import io
 import os
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
+# Importar rutas de proveedores
+from services.api.routes.suppliers import router as suppliers_router
+
+# Ajuste de path para importación de incident_analyzer
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 if CURRENT_DIR not in sys.path:
     sys.path.insert(0, CURRENT_DIR)
@@ -18,21 +24,34 @@ if CURRENT_DIR not in sys.path:
 from incident_analyzer import analyze_incidents, flatten_summary_to_rows, parse_incidents_csv
 
 
-app = FastAPI(title="TrackFlow Incidents API", version="1.0.0")
+# Inicialización de FastAPI
+app = FastAPI(title="TrackFlow Unified API", version="1.0.0")
 
+# Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://127.0.0.1:8080",
         "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
     ],
     allow_origin_regex=r"https://.*\.app\.github\.dev",
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_credentials=True,
 )
 
+# Inclusión de routers
+app.include_router(suppliers_router)
 
+# Montaje de archivos estáticos para Backoffice
+BACKOFFICE_DIR = Path(__file__).resolve().parents[2] / "uis" / "backoffice"
+if BACKOFFICE_DIR.exists():
+    app.mount("/backoffice", StaticFiles(directory=BACKOFFICE_DIR, html=True), name="backoffice")
+
+
+# Variables globales para análisis de incidentes
 LAST_ANALYSIS: dict[str, Any] | None = None
 LAST_ANALYSIS_AT: str | None = None
 

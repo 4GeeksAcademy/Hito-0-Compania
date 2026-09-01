@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hito-0-compania-api"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.116.1",
+    "tinydb>=4.8.2",
+    "uvicorn>=0.35.0",
+]
+
+[project.scripts]
+seed = "services.api.seed:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["services*"]

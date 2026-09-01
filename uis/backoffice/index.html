@@ -3,79 +3,126 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Backoffice TrackFlow | Análisis de Incidencias</title>
+    <title>Backoffice | Directorio de Proveedores</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="shell">
-      <aside class="sidebar">
-        <h1>TrackFlow<br />Backoffice</h1>
-        <nav aria-label="Menu principal">
-          <a href="#" class="menu-item">Resumen operativo</a>
-          <a href="#" class="menu-item active">Analisis de incidencias</a>
-          <a href="#" class="menu-item">Transportistas</a>
-          <a href="#" class="menu-item">Devoluciones</a>
-        </nav>
-      </aside>
+    <header class="topbar">
+      <div class="brand-wrap">
+        <p class="eyebrow">TrackFlow Tech</p>
+        <h1>Backoffice de Proveedores</h1>
+      </div>
+      <nav class="menu" aria-label="Menu de aplicacion">
+        <a href="../../index.html">Inicio</a>
+        <a href="../../application.html">Solicitud</a>
+        <a class="active" href="index.html">Backoffice</a>
+      </nav>
+    </header>
 
-      <main class="content">
-        <header class="header">
-          <p class="eyebrow">Unidad interna: TrackFlow Tech</p>
-          <h2>Analizador de incidencias</h2>
-          <p>
-            Carga un CSV interno para validar registros, calcular métricas y exportar el último análisis.
-          </p>
-        </header>
+    <main class="layout">
+      <section class="panel">
+        <h2>Filtros</h2>
+        <div class="filters">
+          <label>
+            Pais
+            <select id="country-filter">
+              <option value="">Todos</option>
+              <option value="USA">USA</option>
+              <option value="Spain">Spain</option>
+            </select>
+          </label>
+          <label>
+            Categoria
+            <select id="category-filter"></select>
+          </label>
+          <button id="refresh-btn" type="button">Actualizar listado</button>
+        </div>
+        <p id="list-feedback" class="feedback" aria-live="polite"></p>
+      </section>
 
-        <section class="card uploader">
-          <h3>Subida de fichero</h3>
-          <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-label="Zona de subida CSV">
-            <p>Arrastra aquí tu CSV o usa el selector</p>
-            <input id="file-input" type="file" accept=".csv" />
-            <label for="file-input" class="btn secondary">Seleccionar archivo</label>
-            <p id="selected-file" class="muted">Ningún fichero seleccionado.</p>
+      <section class="panel">
+        <h2>Registrar proveedor</h2>
+        <form id="supplier-form" class="supplier-form" novalidate>
+          <div class="grid-2">
+            <label>
+              Nombre
+              <input required name="name" type="text" />
+            </label>
+            <label>
+              Pais
+              <select required name="country" id="country-input">
+                <option value="USA">USA</option>
+                <option value="Spain">Spain</option>
+              </select>
+            </label>
+            <label>
+              Moneda
+              <input name="currency" id="currency-input" type="text" value="USD" readonly />
+            </label>
+            <label>
+              Tarifa por envio
+              <input required name="rate_per_shipment" type="number" min="0.01" step="0.01" />
+            </label>
+            <label>
+              Estado
+              <select required name="status">
+                <option value="active">active</option>
+                <option value="suspended">suspended</option>
+              </select>
+            </label>
+            <label>
+              Zona de servicio
+              <input name="service_zone" type="text" />
+            </label>
+            <label>
+              Email de contacto
+              <input name="contact_email" type="email" />
+            </label>
+            <label>
+              Notas
+              <input name="notes" type="text" />
+            </label>
           </div>
 
-          <div class="actions">
-            <button id="analyze-btn" class="btn primary" type="button">Analizar</button>
-            <button id="download-btn" class="btn secondary" type="button" disabled>Descargar CSV</button>
-          </div>
+          <p class="feedback">La categoria del proveedor se toma del filtro superior.</p>
 
-          <p id="status" class="status" aria-live="polite"></p>
-        </section>
+          <button type="submit" class="create-provider-btn">Crear proveedor</button>
+          <p id="form-feedback" class="feedback" aria-live="polite"></p>
+        </form>
+      </section>
 
-        <section id="results" class="card hidden">
-          <h3>Resumen de resultados</h3>
+      <section class="panel panel-table">
+        <h2>Directorio</h2>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Pais</th>
+                <th>Categorias</th>
+                <th>Tarifa</th>
+                <th>Moneda</th>
+                <th>Estado</th>
+                <th>Zona de servicio</th>
+                <th>Email de contacto</th>
+                <th>Notas</th>
+                <th>Ult. actualizacion</th>
+                <th>Actualizar tarifa</th>
+                <th>Cambiar estado</th>
+              </tr>
+            </thead>
+            <tbody id="suppliers-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
 
-          <div id="totals" class="kpi-grid"></div>
-
-          <div class="split">
-            <article>
-              <h4>Desglose por categoria</h4>
-              <div id="by-category"></div>
-            </article>
-            <article>
-              <h4>Desglose por estado</h4>
-              <div id="by-status"></div>
-            </article>
-          </div>
-
-          <article>
-            <h4>Indice de satisfaccion</h4>
-            <p id="satisfaction" class="mono">-</p>
-          </article>
-
-          <article>
-            <h4>Registros invalidos por tipo</h4>
-            <div id="invalid-by-rule"></div>
-          </article>
-        </section>
-      </main>
-    </div>
-
-    <script type="module" src="./main.js"></script>
+    <script type="module" src="app.js"></script>
   </body>
 </html>
