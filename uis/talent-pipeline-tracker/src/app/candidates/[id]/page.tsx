@@ -435,7 +435,7 @@ export default function CandidateDetailPage() {
   }, [notes]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 px-4 py-6 md:px-8 md:py-10">
+      <div className="min-h-screen bg-slate-50 text-slate-900 px-4 py-6 md:px-8 md:py-10">
       <div className="mx-auto w-full max-w-6xl space-y-6">
         <div className="flex items-center justify-between gap-3">
           <Link

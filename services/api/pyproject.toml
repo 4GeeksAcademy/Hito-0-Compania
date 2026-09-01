@@ -13,3 +13,6 @@ dependencies = [
     "tinydb>=4.9.0",
     "uvicorn[standard]>=0.52.4",
 ]
+
+[tool.setuptools.packages.find]
+include = ["app*"]

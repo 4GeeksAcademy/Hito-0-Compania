@@ -9,6 +9,11 @@ import type {
   RecordsListResponse,
 } from '@/src/types/tracker';
 
+import {
+  buildAuthHeaders,
+  checkUnauthorized,
+} from './http-client';
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ??
   'https://playground.4geeks.com/tracker/api/v1';
@@ -119,9 +124,16 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
     headers: {
       'Content-Type': 'application/json',
+      ...buildAuthHeaders(),
       ...(init?.headers ?? {}),
     },
   });
+
+  // 401 → token inválido/expirado: limpiar sesión y redirigir
+  if (response.status === 401) {
+    checkUnauthorized(response);
+    throw new Error('Sesión expirada. Iniciá sesión nuevamente.');
+  }
 
   if (!response.ok) {
     throw new Error(await extractErrorMessage(response));
