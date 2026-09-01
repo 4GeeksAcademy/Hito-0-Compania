@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Backoffice TrackFlow | Análisis de Incidencias</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <h1>TrackFlow<br />Backoffice</h1>
+        <nav aria-label="Menu principal">
+          <a href="#" class="menu-item">Resumen operativo</a>
+          <a href="#" class="menu-item active">Analisis de incidencias</a>
+          <a href="#" class="menu-item">Transportistas</a>
+          <a href="#" class="menu-item">Devoluciones</a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <header class="header">
+          <p class="eyebrow">Unidad interna: TrackFlow Tech</p>
+          <h2>Analizador de incidencias</h2>
+          <p>
+            Carga un CSV interno para validar registros, calcular métricas y exportar el último análisis.
+          </p>
+        </header>
+
+        <section class="card uploader">
+          <h3>Subida de fichero</h3>
+          <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-label="Zona de subida CSV">
+            <p>Arrastra aquí tu CSV o usa el selector</p>
+            <input id="file-input" type="file" accept=".csv" />
+            <label for="file-input" class="btn secondary">Seleccionar archivo</label>
+            <p id="selected-file" class="muted">Ningún fichero seleccionado.</p>
+          </div>
+
+          <div class="actions">
+            <button id="analyze-btn" class="btn primary" type="button">Analizar</button>
+            <button id="download-btn" class="btn secondary" type="button" disabled>Descargar CSV</button>
+          </div>
+
+          <p id="status" class="status" aria-live="polite"></p>
+        </section>
+
+        <section id="results" class="card hidden">
+          <h3>Resumen de resultados</h3>
+
+          <div id="totals" class="kpi-grid"></div>
+
+          <div class="split">
+            <article>
+              <h4>Desglose por categoria</h4>
+              <div id="by-category"></div>
+            </article>
+            <article>
+              <h4>Desglose por estado</h4>
+              <div id="by-status"></div>
+            </article>
+          </div>
+
+          <article>
+            <h4>Indice de satisfaccion</h4>
+            <p id="satisfaction" class="mono">-</p>
+          </article>
+
+          <article>
+            <h4>Registros invalidos por tipo</h4>
+            <div id="invalid-by-rule"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
