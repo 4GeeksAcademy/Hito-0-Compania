@@ -125,10 +125,14 @@ async function request<T>(
     headers: { ...headers, ...(options.headers as Record<string, string> ?? {}) },
   });
 
-  // 401 → token inválido/expirado: limpiar sesión y redirigir
   if (response.status === 401) {
-    checkUnauthorized(response);
-    throw new ValidationError('Sesión expirada. Iniciá sesión nuevamente.');
+    // Solo las llamadas autenticadas (con token) disparan logout/redirección.
+    // El login público (sin token) debe reportar credenciales inválidas, no expulsar la sesión.
+    if (options.token) {
+      checkUnauthorized(response);
+      throw new ValidationError('Sesión expirada. Iniciá sesión nuevamente.');
+    }
+    throw await extractError(response);
   }
 
   if (!response.ok) {

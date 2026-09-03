@@ -47,7 +47,7 @@ def owner_or_admin(
         )
 
 
-@router.post("")
+@router.post("", status_code=201)
 def register(data: UserCreate):
 
     if get_user_by_email(data.email):
