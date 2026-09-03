@@ -1,6 +1,7 @@
 'use client';
 
 import { type FormEvent, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 
 import FeedbackAlert from '@/src/components/FeedbackAlert';
 import { useAuth } from '@/src/context/AuthContext';
@@ -251,7 +252,13 @@ export default function AccountProfilePage() {
 
             {/* Cerrar sesión */}
             {!editing && (
-              <div className="flex justify-center pt-4">
+              <div className="flex justify-center gap-3 pt-4">
+                <Link
+                  href="/account/change-password"
+                  className="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+                >
+                  Cambiar contraseña
+                </Link>
                 <LogoutButton />
               </div>
             )}

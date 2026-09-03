@@ -1,10 +1,17 @@
 from tinydb import Query
 
-from app.core.database import users_table, profiles_table
+from app.core.database import (
+    password_audit_table,
+    password_resets_table,
+    profiles_table,
+    users_table,
+)
 
 
 User = Query()
 Profile = Query()
+PasswordReset = Query()
+PasswordAudit = Query()
 
 
 def get_user_by_id(user_id: str):
@@ -62,3 +69,34 @@ def update_profile(user_id: str, changes: dict):
     )
 
     return get_profile_by_user_id(user_id)
+
+
+def create_password_reset(record: dict):
+    password_resets_table.insert(record)
+    return record
+
+
+def get_password_reset(jti: str):
+    return password_resets_table.get(
+        PasswordReset.jti == jti
+    )
+
+
+def mark_password_reset_used(jti: str):
+    password_resets_table.update(
+        {"used": True},
+        PasswordReset.jti == jti
+    )
+
+
+def log_password_event(event: dict):
+    password_audit_table.insert(event)
+    return event
+
+
+def count_recent_password_reset_requests(email: str, since: str) -> int:
+    return len(password_audit_table.search(
+        (PasswordAudit.event == "forgot_password_requested")
+        & (PasswordAudit.email == email)
+        & (PasswordAudit.timestamp >= since)
+    ))
