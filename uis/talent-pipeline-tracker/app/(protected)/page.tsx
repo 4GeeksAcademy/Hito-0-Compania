@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
@@ -334,42 +334,39 @@ export default function Page() {
     });
   }
 
+  const loadCandidates = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await trackerApi.getCandidates();
+      const withLocation = withMappedCity(data);
+      const locationFiltered = filterByLocation(withLocation, location);
+      const queryFiltered = filterByQueryParams(
+        locationFiltered,
+        new URLSearchParams(searchParamsKey),
+      );
+
+      setCandidates(queryFiltered);
+    } catch (fetchError) {
+      setError(fetchError instanceof Error ? fetchError.message : 'No se pudo cargar el pipeline.');
+    } finally {
+      setLoading(false);
+    }
+  }, [location, searchParamsKey, candidateCityMap]);
+
   useEffect(() => {
     let active = true;
 
-    async function fetchCandidates() {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const data = await trackerApi.getCandidates();
-        if (!active) return;
-
-        const withLocation = withMappedCity(data);
-        const locationFiltered = filterByLocation(withLocation, location);
-        const queryFiltered = filterByQueryParams(
-          locationFiltered,
-          new URLSearchParams(searchParamsKey),
-        );
-
-        setCandidates(queryFiltered);
-      } catch (fetchError) {
-        if (active) {
-          setError(fetchError instanceof Error ? fetchError.message : 'No se pudo cargar el pipeline.');
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
-    }
-
-    fetchCandidates();
+    (async () => {
+      await loadCandidates();
+      if (!active) return;
+    })();
 
     return () => {
       active = false;
     };
-  }, [location, searchParamsKey, candidateCityMap]);
+  }, [loadCandidates]);
 
   function setQueryParam(key: 'status' | 'stage', value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -686,7 +683,12 @@ export default function Page() {
           </div>
 
           {error ? (
-            <FeedbackAlert message={t.loadError + ': ' + error} variant="error" className="mb-lg p-md" />
+            <FeedbackAlert
+              message={t.loadError + ': ' + error}
+              variant="error"
+              className="mb-lg p-md"
+              action={{ label: 'Reintentar', onClick: loadCandidates }}
+            />
           ) : null}
 
           <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm w-full max-w-full min-w-0">
@@ -729,8 +731,8 @@ export default function Page() {
 
                   {!loading
                     ? visibleCandidates.map((candidate) => {
-                        const name = candidate.full_name;
-                        const email = candidate.email;
+                        const name = candidate?.full_name ?? '';
+                        const email = candidate?.email ?? '';
 
                         return (
                           <tr key={candidate.id} className="hover:bg-background transition-colors group cursor-pointer">
@@ -750,17 +752,17 @@ export default function Page() {
                               </div>
                             </td>
                             <td className="px-lg py-4">
-                              <p className="text-body-md text-on-surface-variant font-medium">{candidate.position}</p>
-                              <p className="text-label-sm font-label-sm text-outline">{getTrackFlowFallback(Number(candidate.id.replace(/\D/g, '').slice(-2)) || 0)}</p>
+                              <p className="text-body-md text-on-surface-variant font-medium">{candidate?.position ?? ''}</p>
+                              <p className="text-label-sm font-label-sm text-outline">{getTrackFlowFallback(Number((candidate.id ?? '').replace(/\D/g, '').slice(-2)) || 0)}</p>
                             </td>
                             <td className="px-lg py-4">
-                              <span className={'inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md ' + getStatusChipClass(candidate.status)}>
-                                {getStatusDisplayLabel(candidate.status)}
+                              <span className={'inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md ' + getStatusChipClass(candidate?.status ?? 'pending')}>
+                                {getStatusDisplayLabel(candidate?.status ?? 'pending')}
                               </span>
                             </td>
                             <td className="px-lg py-4">
-                              <span className={'inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md ' + getStageChipClass(candidate.stage)}>
-                                {getStageDisplayLabel(candidate.stage)}
+                              <span className={'inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md ' + getStageChipClass(candidate?.stage ?? 'screening')}>
+                                {getStageDisplayLabel(candidate?.stage ?? 'screening')}
                               </span>
                             </td>
                             <td className="px-lg py-4 text-right">
@@ -801,8 +803,8 @@ export default function Page() {
 
               {!loading
                 ? visibleCandidates.map((candidate) => {
-                    const name = candidate.full_name;
-                    const email = candidate.email;
+                    const name = candidate?.full_name ?? '';
+                    const email = candidate?.email ?? '';
 
                     return (
                       <div key={candidate.id} className="w-full max-w-full block p-3 border border-gray-100 rounded-xl bg-white shadow-sm">
@@ -817,16 +819,16 @@ export default function Page() {
                           <div className="min-w-0 flex-1">
                             <p className="text-body-md font-bold text-on-surface truncate">{name}</p>
                             <p className="text-label-sm text-on-surface-variant truncate">{email}</p>
-                            <p className="text-label-sm text-outline mt-1 truncate">{candidate.position || t.fallbackOps}</p>
+                            <p className="text-label-sm text-outline mt-1 truncate">{candidate?.position ?? t.fallbackOps}</p>
                           </div>
                         </div>
 
                         <div className="mt-3 flex flex-wrap gap-2">
-                          <span className={'inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md ' + getStatusChipClass(candidate.status)}>
-                            {getStatusDisplayLabel(candidate.status)}
+                          <span className={'inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md ' + getStatusChipClass(candidate?.status ?? 'pending')}>
+                            {getStatusDisplayLabel(candidate?.status ?? 'pending')}
                           </span>
-                          <span className={'inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md ' + getStageChipClass(candidate.stage)}>
-                            {getStageDisplayLabel(candidate.stage)}
+                          <span className={'inline-flex items-center px-3 py-1 rounded-full text-label-md font-label-md ' + getStageChipClass(candidate?.stage ?? 'screening')}>
+                            {getStageDisplayLabel(candidate?.stage ?? 'screening')}
                           </span>
                         </div>
 

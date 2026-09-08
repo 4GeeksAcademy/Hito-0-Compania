@@ -2,8 +2,9 @@
 Seed data — pobla la base de datos con usuarios, perfiles y proveedores de prueba.
 
 Uso:
-    uv run python seed.py              # Carga los datos
-    uv run python seed.py --clean      # Limpia y carga los datos
+    uv run python seed.py                        # Carga los datos
+    uv run python seed.py --clean                # Limpia y carga los datos
+    uv run python seed.py --show-passwords       # Muestra contraseñas con --clean
 """
 
 from __future__ import annotations
@@ -17,6 +18,11 @@ from passlib.hash import bcrypt
 from tinydb import Query, TinyDB
 
 from app.core.database import profiles_table, users_table
+
+
+def log_error(message: str) -> None:
+    """Imprime un error informativo en stderr (no contamina el stdout)."""
+    print(f"❌ Error: {message}", file=sys.stderr)
 
 SEED_USERS = [
     {
@@ -224,16 +230,24 @@ SUPPLIERS_SEED = [
 
 def clean():
     """Elimina todos los datos existentes."""
-    users_table.truncate()
-    profiles_table.truncate()
-    
+    try:
+        users_table.truncate()
+        profiles_table.truncate()
+    except Exception as exc:
+        log_error(f"no se pudo limpiar la base de datos principal: {exc}")
+        raise
+
     # Limpia también la base de proveedores si existe
     db_path = Path(__file__).resolve().parent / "suppliers_db.json"
     if db_path.exists():
-        db = TinyDB(db_path)
-        db.table("suppliers").truncate()
-        db.close()
-        
+        try:
+            db = TinyDB(db_path)
+            db.table("suppliers").truncate()
+            db.close()
+        except Exception as exc:
+            log_error(f"no se pudo limpiar la base de proveedores: {exc}")
+            raise
+
     print("🗑️  Base de datos limpiada")
 
 
@@ -259,8 +273,12 @@ def seed_users():
             "address": data["address"],
         }
 
-        users_table.insert(user)
-        profiles_table.insert(profile)
+        try:
+            users_table.insert(user)
+            profiles_table.insert(profile)
+        except Exception as exc:
+            log_error(f"no se pudo insertar el usuario {data['email']}: {exc}")
+            raise
 
         print(f"✅  {data['email']:<20} → role: {data['role']}")
 
@@ -270,45 +288,71 @@ def seed_users():
 def seed_suppliers():
     """Inserta los datos de prueba para proveedores."""
     db_path = Path(__file__).resolve().parent / "suppliers_db.json"
-    db = TinyDB(db_path)
-    suppliers_table = db.table("suppliers")
+
+    try:
+        db = TinyDB(db_path)
+        suppliers_table = db.table("suppliers")
+    except Exception as exc:
+        log_error(f"no se pudo abrir la base de proveedores ({db_path}): {exc}")
+        raise
+
     supplier = Query()
 
     inserted_count = 0
 
-    for item in SUPPLIERS_SEED:
-        exists = suppliers_table.contains(
-            (supplier.name == item["name"]) & (supplier.country == item["country"])
-        )
-        if exists:
-            continue
+    try:
+        for item in SUPPLIERS_SEED:
+            exists = suppliers_table.contains(
+                (supplier.name == item["name"]) & (supplier.country == item["country"])
+            )
+            if exists:
+                continue
 
-        new_item = item.copy()
-        new_item["updated_at"] = datetime.now(timezone.utc).isoformat()
-        suppliers_table.insert(new_item)
-        inserted_count += 1
+            new_item = item.copy()
+            new_item["updated_at"] = datetime.now(timezone.utc).isoformat()
+            suppliers_table.insert(new_item)
+            inserted_count += 1
+    except Exception as exc:
+        log_error(f"no se pudieron insertar los proveedores: {exc}")
+        db.close()
+        raise
 
     print(f"📦  Seeder de proveedores completado. Registros insertados: {inserted_count}")
     db.close()
 
 
-def main():
+def main() -> int:
     do_clean = "--clean" in sys.argv
+    show_passwords = "--show-passwords" in sys.argv
 
-    if do_clean:
-        clean()
+    try:
+        if do_clean:
+            clean()
 
-    seed_users()
-    seed_suppliers()
+        seed_users()
+        seed_suppliers()
+    except Exception as exc:
+        log_error(f"el seed falló: {exc}")
+        return 1
 
-    print("\n📋  Resumen de credenciales de usuario:")
-    print("   ┌─────────────────────┬──────────────┐")
-    print("   │ Email               │ Contraseña   │")
-    print("   ├─────────────────────┼──────────────┤")
-    for data in SEED_USERS:
-        print(f"   │ {data['email']:<20} │ {data['password']:<12} │")
-    print("   └─────────────────────┴──────────────┘")
+    print("\n✅  Seed completado.")
+
+    # No exponemos contraseñas por defecto. Solo se muestran si se solicita
+    # explícitamente con --show-passwords (entornos de desarrollo).
+    if show_passwords:
+        print("\n📋  Resumen de credenciales de usuario:")
+        print("   ┌─────────────────────┬──────────────┐")
+        print("   │ Email               │ Contraseña   │")
+        print("   ├─────────────────────┼──────────────┤")
+        for data in SEED_USERS:
+            print(f"   │ {data['email']:<20} │ {data['password']:<12} │")
+        print("   └─────────────────────┴──────────────┘")
+    else:
+        print("\n🔒  Las contraseñas no se muestran por seguridad. "
+              "Usá `--show-passwords` solo en desarrollo.")
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

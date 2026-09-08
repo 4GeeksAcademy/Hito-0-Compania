@@ -85,7 +85,25 @@ function normalizeCandidate(raw: RawCandidateRecord): CandidateRecord {
 }
 
 async function extractErrorMessage(response: Response): Promise<string> {
-  const fallback = 'Request failed with status ' + response.status;
+  const statusCode = response.status;
+
+  const statusMessages: Record<number, string> = {
+    400: 'La solicitud no es válida. Revisá los datos e intentá nuevamente.',
+    401: 'Tu sesión expiró. Iniciá sesión de nuevo.',
+    403: 'No tenés permiso para realizar esta acción.',
+    404: 'No encontramos lo que buscabas.',
+    409: 'Ya existe un registro con esos datos.',
+    422: 'Algunos datos ingresados no son válidos.',
+    429: 'Hiciste demasiadas solicitudes. Esperá unos segundos y volvé a intentar.',
+    500: 'Ocurrió un error en el servidor. Si el problema persiste, contactá a soporte.',
+    502: 'El servidor está temporalmente fuera de servicio. Intentá de nuevo en unos minutos.',
+    503: 'El servicio no está disponible en este momento. Intentá más tarde.',
+  };
+
+  const userFriendly = statusMessages[statusCode];
+  if (userFriendly) {
+    return userFriendly;
+  }
 
   try {
     const data = (await response.json()) as ApiErrorPayload;
@@ -112,22 +130,28 @@ async function extractErrorMessage(response: Response): Promise<string> {
       return data.message;
     }
 
-    return fallback;
+    return 'Ocurrió un error inesperado. Intentá de nuevo o contactá a soporte técnico.';
   } catch {
-    return fallback;
+    return 'Error de conexión. Verificá tu conexión a internet e intentá nuevamente.';
   }
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(API_BASE_URL + path, {
-    cache: 'no-store',
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...buildAuthHeaders(),
-      ...(init?.headers ?? {}),
-    },
-  });
+  let response: Response;
+  try {
+    response = await fetch(API_BASE_URL + path, {
+      cache: 'no-store',
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        ...buildAuthHeaders(),
+        ...(init?.headers ?? {}),
+      },
+    });
+  } catch {
+    // Fetch lanzó (sin red / DNS / timeout del navegador)
+    throw new Error('No se pudo conectar con el servidor. Verificá tu conexión e intentá nuevamente.');
+  }
 
   // 401 → token inválido/expirado: limpiar sesión y redirigir
   if (response.status === 401) {
@@ -143,7 +167,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     return undefined as T;
   }
 
-  return (await response.json()) as T;
+  try {
+    return (await response.json()) as T;
+  } catch {
+    throw new Error('El servidor respondió con un formato inesperado. Intentá nuevamente.');
+  }
 }
 
 export async function getRecords(): Promise<CandidateRecord[]> {

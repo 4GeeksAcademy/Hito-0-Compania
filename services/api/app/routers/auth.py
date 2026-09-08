@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
@@ -29,6 +30,8 @@ from app.services.crud import (
 )
 from app.services.email_service import send_password_reset_email
 
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/auth",
@@ -113,7 +116,9 @@ def forgot_password(payload: ForgotPasswordRequest):
     try:
         send_password_reset_email(to_email=user["email"], token=raw_token)
     except Exception as error:
-        print("Error enviando email:", error)
+        # Nunca se filtra el detalle técnico al cliente. Solo se registra
+        # de forma interna para diagnóstico (sin credenciales ni emails).
+        logger.warning("No se pudo enviar el email de reseteo: %s", error)
 
     return {"message": generic_message}
 

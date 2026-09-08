@@ -87,10 +87,25 @@ function parseFieldErrors(detail: unknown): { message: string; fieldErrors: Fiel
 }
 
 async function extractError(response: Response): Promise<ValidationError> {
+  const statusMessages: Record<number, string> = {
+    400: 'La solicitud no es válida. Revisá los datos ingresados.',
+    401: 'Credenciales incorrectas. Verificá tu email y contraseña.',
+    403: 'No tenés permiso para realizar esta acción.',
+    404: 'No encontramos lo que buscabas.',
+    409: 'El email ya está registrado. Probá con otro o iniciá sesión.',
+    422: 'Algunos datos ingresados no son válidos.',
+    429: 'Demasiados intentos. Esperá unos segundos y volvé a intentar.',
+    500: 'Error en el servidor. Si el problema persiste, contactá a soporte.',
+  };
+
+  const userFriendly = statusMessages[response.status];
+  if (userFriendly) {
+    return new ValidationError(userFriendly);
+  }
+
   try {
     const data = (await response.json()) as ApiErrorPayload;
 
-    // FastAPI validation errors (422): detail es un array con loc/msg
     if (Array.isArray(data.detail)) {
       const parsed = parseFieldErrors(data.detail);
       return new ValidationError(parsed.message, parsed.fieldErrors);
@@ -105,7 +120,7 @@ async function extractError(response: Response): Promise<ValidationError> {
   } catch {
     // fallback
   }
-  return new ValidationError(`Error del servidor (${response.status})`);
+  return new ValidationError(`Error del servidor (${response.status}). Si el problema persiste, contactá a soporte.`);
 }
 
 async function request<T>(
@@ -120,10 +135,15 @@ async function request<T>(
     headers['Authorization'] = `Bearer ${options.token}`;
   }
 
-  const response = await fetch(`${resolveApiBase()}${path}`, {
-    ...options,
-    headers: { ...headers, ...(options.headers as Record<string, string> ?? {}) },
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${resolveApiBase()}${path}`, {
+      ...options,
+      headers: { ...headers, ...(options.headers as Record<string, string> ?? {}) },
+    });
+  } catch {
+    throw new ValidationError('No se pudo conectar con el servidor. Verificá tu conexión e intentá nuevamente.');
+  }
 
   if (response.status === 401) {
     // Solo las llamadas autenticadas (con token) disparan logout/redirección.
@@ -140,7 +160,12 @@ async function request<T>(
   }
 
   if (response.status === 204) return undefined as T;
-  return (await response.json()) as T;
+
+  try {
+    return (await response.json()) as T;
+  } catch {
+    throw new ValidationError('El servidor respondió con un formato inesperado. Intentá nuevamente.');
+  }
 }
 
 /* ──────────────────── Endpoints públicos ────────────────────── */
