@@ -22,6 +22,7 @@
         <a href="../../index.html">Inicio</a>
         <a href="../../application.html">Solicitud</a>
         <a class="active" href="index.html">Backoffice</a>
+        <a href="../incident-manager/index.html">Incidencias</a>
       </nav>
     </header>
 
@@ -120,9 +121,53 @@
             <tbody id="suppliers-body"></tbody>
           </table>
         </div>
+
+        <!-- Paginación -->
+        <div id="suppliers-pagination" class="pagination" hidden>
+          <button id="suppliers-prev-btn" type="button" class="action-btn" disabled>← Anterior</button>
+          <span id="suppliers-page-info" class="page-info">Página 1 de 1</span>
+          <button id="suppliers-next-btn" type="button" class="action-btn" disabled>Siguiente →</button>
+        </div>
+      </section>
+
+      <!-- ─── ANÁLISIS DE INCIDENCIAS ─── -->
+      <section class="panel" id="csv-panel">
+        <h2>Análisis de incidencias</h2>
+        <p class="field-hint" style="display:block;">
+          Arrastra un CSV con incidencias o selecciona un fichero para analizar.
+        </p>
+        <div id="dropzone" class="dropzone">
+          <input id="file-input" type="file" accept=".csv" />
+          <p id="selected-file">Ningún fichero seleccionado.</p>
+        </div>
+        <div class="form-actions">
+          <button id="analyze-btn" type="button" class="action-btn approve">Analizar</button>
+          <button id="download-btn" type="button" class="action-btn" disabled>Descargar CSV</button>
+        </div>
+        <p id="status" class="feedback" aria-live="polite"></p>
+
+        <div id="results" class="hidden">
+          <h3 class="summary-block-title">Resumen del análisis</h3>
+          <div id="totals" class="kpi-grid"></div>
+          <div class="grid-2">
+            <div>
+              <h4 class="summary-block-title">Por categoría</h4>
+              <div id="by-category"></div>
+            </div>
+            <div>
+              <h4 class="summary-block-title">Por estado</h4>
+              <div id="by-status"></div>
+            </div>
+          </div>
+          <h4 class="summary-block-title">Inválidos por regla</h4>
+          <div id="invalid-by-rule"></div>
+          <h4 class="summary-block-title">Satisfacción media (cerrados)</h4>
+          <p id="satisfaction" class="satisfaction-value">—</p>
+        </div>
       </section>
     </main>
 
+    <script type="module" src="main.js"></script>
     <script type="module" src="app.js"></script>
   </body>
 </html>

@@ -19,6 +19,11 @@ source .venv/bin/activate
 # Instalar dependencias
 pip install -r requirements.txt 2>/dev/null || pip install "fastapi>=0.116,<1" "uvicorn[standard]>=0.35,<1" "python-multipart>=0.0.9,<1" "python-dotenv>=1.0,<2" "passlib[bcrypt]>=1.7,<2" "python-jose[cryptography]>=3.3,<4" "tinydb>=4.8,<5" "resend>=0.8,<1"
 
+# IMPORTANTE (solo Python 3.12+): fijar bcrypt a 4.0.1
+# Si pip instala bcrypt >= 4.1, passlib se rompe con:
+#   AttributeError: module 'bcrypt' has no attribute '__about__'
+pip install "bcrypt==4.0.1"
+
 # Configurar .env con secrets (IMPORTANTE: generar clave única)
 echo "JWT_SECRET=$(python3 -c 'import secrets; print(secrets.token_urlsafe(64))')" >> .env
 echo "RESEND_API_KEY=re_e8tg1CRG_..." >> .env           # ← pedir a un compañero
@@ -198,3 +203,242 @@ Flujo recomendado:
 - `uis/talent-pipeline-tracker/app/(protected)/account/change-password/page.tsx` — cambio
 - `uis/talent-pipeline-tracker/src/services/auth.ts` — llamadas a la API
 - `uis/talent-pipeline-tracker/src/services/http-client.ts` — cliente HTTP con auto-detección de Codespaces
+
+## 8) Hito 6 — Gestor de Incidencias Centralizado
+
+> Flujo completo: modelo de datos → seed histórico → API REST → frontend de gestión.
+
+### 8.1) Arquitectura
+
+El gestor de incidencias sigue la estructura del monorepo:
+
+| Capa | Ubicación | Rol |
+|---|---|---|
+| **Modelo compartido** | `packages/shared/py/shared/csv_validation.py` | Validación CSV extraída del proyecto anterior |
+| **Script de carga** | `scripts/seed_incidents.py` | Poblar la BD desde el CSV histórico |
+| **API** | `services/api/` | FastAPI + TinyDB + Pydantic v2 |
+| **Frontend** | `uis/incident-manager/` | Vanilla JS (ES modules) + CSS |
+
+### 8.2) Preparación
+
+```bash
+cd /workspaces/Hito-0-Compania
+
+# Asegurar que el servidor está instalado
+pip install "fastapi>=0.141,<1" "uvicorn[standard]>=0.35,<1" "tinydb>=4.9,<1" "pydantic>=2.0,<3"
+
+# ⚠️ Si usas Python 3.12+, fijar bcrypt a 4.0.1 para evitar:
+#    AttributeError: module 'bcrypt' has no attribute '__about__'
+pip install "bcrypt==4.0.1"
+```
+
+### 8.3) Seed — Cargar datos históricos
+
+El script `scripts/seed_incidents.py` lee el CSV legacy (`scripts/incidents-COMPANY.csv`), valida cada fila usando el módulo compartido, transforma los campos al modelo de incidencias y los inserta en TinyDB.
+
+```bash
+cd /workspaces/Hito-0-Compania
+
+# Cargar datos históricos (82 incidencias válidas, 18 inválidas reportadas)
+python scripts/seed_incidents.py
+
+# Ver en modo dry-run (sin escribir)
+python scripts/seed_incidents.py --dry-run
+
+# Es idempotente: si se ejecuta de nuevo, las 82 duplicadas se omiten
+python scripts/seed_incidents.py
+```
+
+**Transformaciones que aplica el seed:**
+
+| CSV original | Incidencia (TinyDB) |
+|---|---|
+| `status = "abierto" / "en_proceso" / "resuelto" / "cerrado" / "descartado"` | `status = "open" / "in_progress" / "resolved" / "discarded"` |
+| `category = "queja" / "solicitud" / "fallo_operativo"` | `category = "queja" / "solicitud" / "fallo_operativo"` |
+| `description` (texto largo) | `title` (primeros ~80 caracteres) |
+| `created_at = "YYYY-MM-DD"` | `created_at = "YYYY-MM-DDTHH:MM:SS+00:00"` (ISO datetime) |
+| `country = "US" / "ES"` | `branch = "US Central" / "Spain Central"` |
+| — | `origin = "customer"` (todas las históricas) |
+| `incident_id` | `csv_ref = "csv:INC-XXXX"` (para deduplicación) |
+
+### 8.4) Backend — API REST
+
+Abrir una terminal:
+
+```bash
+cd /workspaces/Hito-0-Compania/services/api
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**Endpoints disponibles:**
+
+| Método | Ruta | Descripción | Códigos |
+|---|---|---|---|
+| `POST` | `/api/incidents` | Crear una incidencia | 201 ✅ / 400 ❌ |
+| `GET` | `/api/incidents` | Listar incidencias (con filtros) | 200 ✅ |
+| `GET` | `/api/incidents/summary` | Métricas agregadas | 200 ✅ |
+| `GET` | `/api/incidents/{id}` | Detalle de una incidencia | 200 ✅ / 404 ❌ |
+| `PATCH` | `/api/incidents/{id}/status` | Cambiar estado (ciclo de vida) | 200 ✅ / 400 ❌ |
+
+**Filtros del listado:** `?status=open&origin=customer&branch=Spain+Central&category=queja`
+
+**Ciclo de vida del estado:**
+
+```
+Open ──→ In Progress ──→ Resolved (final)
+  │                        │
+  └──→ Discarded (final)   └──→ (no se puede cambiar)
+```
+
+**Transiciones válidas:**
+- `open` → `in_progress` o `discarded`
+- `in_progress` → `resolved` o `discarded`
+- `resolved` y `discarded` son **finales** (rechazadas con 400)
+
+**Prueba rápida con curl:**
+
+```bash
+# Health
+curl http://127.0.0.1:8000/health
+
+# Crear incidencia
+curl -s -X POST http://127.0.0.1:8000/api/incidents \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Paquete no entregado","description":"El cliente reclama que no recibi\u00f3 su pedido","category":"queja","origin":"customer","branch":"Los Angeles"}' | python3 -m json.tool
+
+# Listar abiertas
+curl -s "http://127.0.0.1:8000/api/incidents?status=open" | python3 -m json.tool | head -30
+
+# Resumen de métricas
+curl -s http://127.0.0.1:8000/api/incidents/summary | python3 -m json.tool
+
+# Transición de estado
+curl -s -X PATCH "http://127.0.0.1:8000/api/incidents/{ID}/status" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"in_progress"}' | python3 -m json.tool
+
+# Transición inválida (resolved → open → 400)
+curl -s -w "\nHTTP: %{http_code}\n" -X PATCH "http://127.0.0.1:8000/api/incidents/{ID_RESUELTA}/status" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"open"}'
+
+# Error de validación (400 con campo identificado)
+curl -s -X POST http://127.0.0.1:8000/api/incidents \
+  -H "Content-Type: application/json" \
+  -d '{"title":"","category":"invalida"}' | python3 -m json.tool
+```
+
+### 8.5) Frontend — Gestor de Incidencias
+
+El frontend es una página HTML/CSS/JS vanilla que se sirve estáticamente. Se puede abrir directamente desde el explorador o servir con cualquier servidor estático.
+
+**Abrir en el navegador:**
+
+```bash
+# Opción A: directo desde VS Code (hacer clic derecho en el archivo → Open with Live Server)
+uis/incident-manager/index.html
+
+# Opción B: usando Python (si la API está en puerto 8000)
+cd /workspaces/Hito-0-Compania
+python3 -m http.server 3000 --directory .
+# Luego abrir http://localhost:3000/uis/incident-manager/
+```
+
+> ⚠️ Si abres el archivo directamente (`file://`), el `fetch` fallará por CORS. Usa Live Server o un servidor HTTP.
+
+**El frontend detecta automáticamente la URL de la API:**
+- `localhost` → `http://localhost:8000`
+- Codespaces (`*.app.github.dev`) → puerto 8000
+- Se puede forzar con `?apiBase=URL`
+
+#### Formulario de registro
+
+1. Completar título, descripción, origen, categoría y sede (opcional según origen)
+2. Si se selecciona origen **"Sede"**, el campo sede se **resalta visualmente** (fondo naranja + borde)
+3. Pulsar **"Registrar incidencia"**
+4. El botón se deshabilita y muestra un spinner durante el envío
+5. Si hay errores de validación, aparecen junto a cada campo **antes de enviar al servidor**
+6. Si la API devuelve errores, se muestran en lenguaje comprensible (nunca stack traces)
+
+#### Panel de listado
+
+Tres estados visuales:
+
+| Estado | Qué se muestra |
+|---|---|
+| **Cargando** | Spinner + "Cargando incidencias..." |
+| **Vacío** | Mensaje contextual ("No hay incidencias para los filtros aplicados" o "Todavía no hay incidencias registradas") |
+| **Con datos** | Tabla con columnas: Título, Estado, Categoría, Origen, Sede, Creada, Actualizada, Acción |
+
+**Filtros:** por Estado, Origen, Sede y Categoría (se actualiza al cambiar).
+
+**Actualización de estado (optimista):**
+1. Al hacer clic en "Iniciar" o "Resolver", el badge cambia **inmediatamente**
+2. Si la API falla, se **revierte visualmente** al estado anterior (rollback)
+3. Los botones de la fila se deshabilitan durante la petición
+
+#### Panel de resumen
+
+Muestra métricas agregadas:
+- **Por estado:** Total, Abiertas, En progreso, Resueltas, Descartadas
+- **Por categoría:** Queja, Solicitud, Fallo operativo
+- **Por origen:** Cliente, Sede, Interno
+- **Por sede:** Los Ángeles, Zaragoza, Central / Oficina Principal, US Central, Spain Central
+
+Si la petición falla, se muestra un mensaje de error con botón **"Reintentar"** sin afectar al resto de la página.
+
+### 8.6) Verificación completa
+
+Ejecutar estos checks para validar que todo funciona:
+
+```bash
+# 1) Seed (debe decir 82 insertadas, 0 duplicadas si es primera vez)
+python scripts/seed_incidents.py
+
+# 2) Servidor funcionando
+curl -s http://127.0.0.1:8000/health
+
+# 3) Summary con datos (debe coincidir con las 82 del seed)
+curl -s http://127.0.0.1:8000/api/incidents/summary | python3 -m json.tool
+
+# 4) Listado con filtro
+curl -s "http://127.0.0.1:8000/api/incidents?status=open" | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'{len(d)} incidencias abiertas')"
+
+# 5) POST + transición válida
+ID=$(curl -s -X POST http://127.0.0.1:8000/api/incidents \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Test","description":"Test","category":"queja","origin":"internal","branch":"central"}' | python3 -c "import json,sys; print(json.load(sys.stdin)['id'])")
+echo "Creada: $ID"
+curl -s -X PATCH "http://127.0.0.1:8000/api/incidents/$ID/status" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"in_progress"}' | python3 -c "import json,sys; print('Estado:', json.load(sys.stdin)['status'])"
+
+# 6) Transición inválida (debe dar 400)
+RESOLVED_ID=$(curl -s "http://127.0.0.1:8000/api/incidents?status=resolved" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d[0]['id'] if d else '')")
+curl -s -w "\nHTTP: %{http_code}\n" -X PATCH "http://127.0.0.1:8000/api/incidents/$RESOLVED_ID/status" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"open"}'
+
+# 7) 404 en detalle inexistente
+curl -s -w "\nHTTP: %{http_code}\n" "http://127.0.0.1:8000/api/incidents/no-existe"
+
+# 8) Validación con campo identificado (400)
+curl -s -X POST http://127.0.0.1:8000/api/incidents \
+  -H "Content-Type: application/json" \
+  -d '{"title":""}' | python3 -c "import json,sys; d=json.load(sys.stdin); [print(f'  {e[\"field\"]}: {e[\"message\"]}') for e in d]"
+```
+
+### 8.7) Archivos clave del Gestor de Incidencias
+
+| Capa | Archivo | Propósito |
+|---|---|---|
+| **Modelo** | `services/api/models.py` | Enums, IncidentCreate/Update/Response, validaciones Pydantic v2 |
+| **BD** | `services/api/app/core/database.py` | TinyDB con tabla `incidents` |
+| **Router** | `services/api/routes/incidents.py` | Endpoints CRUD + summary + transiciones de estado |
+| **Error handlers** | `services/api/main.py` | `humanize_validation_error()`, errores 400/500 en español |
+| **Validación CSV** | `packages/shared/py/shared/csv_validation.py` | Lógica extraída del proyecto anterior, reutilizada por seed y API |
+| **Seed** | `scripts/seed_incidents.py` | Carga idempotente del CSV histórico a TinyDB |
+| **Frontend HTML** | `uis/incident-manager/index.html` | Formulario, listado con filtros, panel de resumen |
+| **Frontend JS** | `uis/incident-manager/app.js` | Lógica: validación cliente, optimismo+rollback, estados loading/error/empty |
+| **Frontend CSS** | `uis/incident-manager/styles.css` | Estilos: badges, highlight, spinner, summary cards |
+| **Menú** | `uis/backoffice/index.html`, `index.html`, `application.html` | Enlace "Incidencias" en la navegación |

@@ -316,6 +316,46 @@ td:nth-child(12) {
   justify-self: start;
 }
 
+/* ─── Action buttons (pagination, inline actions) ─── */
+.action-btn {
+  margin-top: 0;
+  width: auto;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+  cursor: pointer;
+}
+
+.action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.action-btn.approve {
+  background: var(--accent);
+  color: #fff;
+}
+
+.action-btn.warn {
+  background: var(--warning);
+  color: #fff;
+}
+
+.action-btn.discard {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+.action-btn.discard:hover {
+  background: var(--danger-soft);
+}
+
 td:nth-child(3),
 td:nth-child(9),
 td:nth-child(10) {
@@ -361,4 +401,134 @@ td:nth-child(10) {
     width: 100%;
     min-width: 0;
   }
+}
+
+/* ─── Panel de análisis CSV ─── */
+.dropzone {
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  padding: 2rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  margin: 0.75rem 0;
+}
+
+.dropzone:hover,
+.dropzone.dragover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.dropzone input[type="file"] {
+  display: block;
+  margin: 0 auto 0.75rem;
+}
+
+.dropzone p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.summary-block-title {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.6rem;
+  margin: 0.5rem 0;
+}
+
+.kpi {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  text-align: center;
+}
+
+.kpi p {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+
+.kpi p.value {
+  margin-top: 0.2rem;
+  font-family: "Sora", sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: none;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.35rem 0.75rem;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.kv > div {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.kv strong {
+  color: var(--ink);
+}
+
+.satisfaction-value {
+  font-family: "Sora", sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ─── Paginación ─── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0.5rem 0;
+}
+
+.pagination[hidden] {
+  display: none;
+}
+
+.page-info {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  min-width: 120px;
+  text-align: center;
 }

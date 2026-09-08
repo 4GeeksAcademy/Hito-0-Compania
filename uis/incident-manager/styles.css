@@ -1,0 +1,367 @@
+/* ─── Inherit base styles from backoffice ─── */
+@import url("../backoffice/styles.css");
+
+/* ─── Form enhancements ─── */
+textarea {
+  width: 100%;
+  margin-top: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.field-error {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--danger);
+  min-height: 1.2rem;
+}
+
+.field-hint {
+  display: none;
+  margin-top: 0.3rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.field-hint.visible {
+  display: block;
+}
+
+/* ─── Branch field highlight when origin = branch ─── */
+.branch-field.highlight {
+  background: var(--warning-soft);
+  border: 2px solid var(--warning);
+  border-radius: 12px;
+  padding: 0.6rem 0.7rem 0.3rem;
+  transition: background 0.25s, border-color 0.25s;
+}
+
+.branch-field.highlight select {
+  border-color: var(--warning);
+}
+
+/* ─── Button loading state ─── */
+.form-actions {
+  margin-top: 1rem;
+}
+
+#submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 200px;
+}
+
+#submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  filter: brightness(0.9);
+}
+
+.btn-loader {
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+#submit-btn.loading .btn-text {
+  display: none;
+}
+
+#submit-btn.loading .btn-loader {
+  display: inline-flex;
+}
+
+.spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ─── Summary cards ─── */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.summary-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  text-align: center;
+}
+
+.summary-card.status-open {
+  border-left: 3px solid #3b82f6;
+}
+
+.summary-card.status-in_progress {
+  border-left: 3px solid #f59e0b;
+}
+
+.summary-card.status-resolved {
+  border-left: 3px solid var(--accent);
+}
+
+.summary-card.status-discarded {
+  border-left: 3px solid var(--danger);
+}
+
+.summary-card.status-total {
+  border-left: 3px solid var(--ink);
+}
+
+.summary-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  margin-bottom: 0.15rem;
+}
+
+.summary-value {
+  display: block;
+  font-family: "Sora", sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.summary-value-muted {
+  color: var(--muted);
+}
+
+/* ─── Status badges ─── */
+.badge.open {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.badge.in_progress {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.badge.resolved {
+  background: var(--accent-soft);
+  color: #0f766e;
+}
+
+.badge.discarded {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* ─── Inline action buttons (status change) ─── */
+.action-group {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  margin-top: 0;
+  width: auto;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  border-radius: 8px;
+}
+
+.action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.action-btn.approve {
+  background: var(--accent);
+  color: #fff;
+}
+
+.action-btn.warn {
+  background: var(--warning);
+  color: #fff;
+}
+
+.action-btn.discard {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+.action-btn.discard:hover {
+  background: var(--danger-soft);
+}
+
+/* ─── Responsive tweaks ─── */
+@media (max-width: 600px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Listado: estados (loading / error / empty) ─── */
+.list-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  margin: 0.75rem 0;
+}
+
+.list-state[hidden] {
+  display: none;
+}
+
+.list-loading p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Spinner oscuro (sobre fondo claro) */
+.spinner-dark {
+  border-color: rgba(13, 148, 136, 0.3);
+  border-top-color: var(--accent);
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.list-error {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+}
+
+.list-error-msg {
+  margin: 0;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.list-empty {
+  background: var(--bg);
+}
+
+.empty-title {
+  margin: 0;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.empty-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* ─── Resumen: bloques y estados ─── */
+.summary-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  margin: 0.75rem 0;
+}
+
+.summary-state[hidden] {
+  display: none;
+}
+
+.summary-state p {
+  margin: 0;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.summary-state-error {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+}
+
+.summary-state-error p {
+  color: var(--danger);
+}
+
+.summary-block-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 1.1rem 0 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.summary-block-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.summary-block-title:first-of-type {
+  margin-top: 0.4rem;
+}
+
+/* ─── Paginación ─── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0.5rem 0;
+}
+
+.pagination[hidden] {
+  display: none;
+}
+
+.page-info {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  min-width: 120px;
+  text-align: center;
+}

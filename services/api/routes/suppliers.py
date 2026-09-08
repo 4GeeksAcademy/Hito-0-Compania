@@ -12,6 +12,7 @@ from services.api.models import (
 	SupplierResponse,
 	SupplierStatusUpdate,
 	SupplierRateUpdate,
+	PaginatedSupplierResponse,
 )
 
 
@@ -37,11 +38,13 @@ def create_supplier(payload: SupplierCreate) -> SupplierResponse:
 		db.close()
 
 
-@router.get("", response_model=list[SupplierResponse])
+@router.get("", response_model=PaginatedSupplierResponse)
 def list_suppliers(
 	country: SupplierCountry | None = Query(default=None),
 	category: str | None = Query(default=None),
-) -> list[SupplierResponse]:
+	skip: int = Query(default=0, ge=0, description="Number of records to skip"),
+	limit: int = Query(default=10, ge=1, le=100, description="Max records per page"),
+) -> PaginatedSupplierResponse:
 	db, suppliers = get_suppliers_table()
 	try:
 		results = suppliers.all()
@@ -52,7 +55,15 @@ def list_suppliers(
 		if category is not None:
 			results = [doc for doc in results if category in doc.get("categories", [])]
 
-		return [_to_supplier_response(doc) for doc in results]
+		total = len(results)
+		paginated = results[skip : skip + limit]
+
+		return PaginatedSupplierResponse(
+			items=[_to_supplier_response(doc) for doc in paginated],
+			total=total,
+			skip=skip,
+			limit=limit,
+		)
 	finally:
 		db.close()
 
