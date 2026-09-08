@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestor de Incidencias | TrackFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand-wrap">
+        <p class="eyebrow">TrackFlow Tech</p>
+        <h1>Gestor de Incidencias</h1>
+      </div>
+      <nav class="menu" aria-label="Menu de aplicacion">
+        <a href="../../index.html">Inicio</a>
+        <a href="../../application.html">Solicitud</a>
+        <a href="../backoffice/index.html">Backoffice</a>
+        <a class="active" href="index.html">Incidencias</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <!-- ─── FORMULARIO DE REGISTRO ─── -->
+      <section class="panel" id="form-panel">
+        <h2>Registrar incidencia</h2>
+        <form id="incident-form" novalidate>
+          <div class="grid-2">
+            <label>
+              Título *
+              <input
+                id="field-title"
+                name="title"
+                type="text"
+                required
+                maxlength="200"
+                placeholder="Ej: Paquete no entregado"
+              />
+              <span class="field-error" id="error-title" aria-live="polite"></span>
+            </label>
+
+            <label>
+              Origen *
+              <select id="field-origin" name="origin" required>
+                <option value="">Seleccionar origen</option>
+                <option value="customer">Cliente</option>
+                <option value="branch">Sede</option>
+                <option value="internal">Interno</option>
+              </select>
+              <span class="field-error" id="error-origin" aria-live="polite"></span>
+            </label>
+
+            <label>
+              Categoría *
+              <select id="field-category" name="category" required>
+                <option value="">Seleccionar categoría</option>
+                <option value="queja">Queja</option>
+                <option value="solicitud">Solicitud</option>
+                <option value="fallo_operativo">Fallo operativo</option>
+              </select>
+              <span class="field-error" id="error-category" aria-live="polite"></span>
+            </label>
+
+            <label class="branch-field" id="branch-wrapper">
+              Sede *
+              <select id="field-branch" name="branch" required>
+                <option value="">Seleccionar sede</option>
+                <option value="Los Angeles">Los Ángeles</option>
+                <option value="Zaragoza">Zaragoza</option>
+                <option value="central">Central / Oficina Principal</option>
+                <option value="US Central">US Central</option>
+                <option value="Spain Central">Spain Central</option>
+              </select>
+              <span class="field-hint" id="branch-hint">
+                Estás reportando desde una sede específica.
+              </span>
+              <span class="field-error" id="error-branch" aria-live="polite"></span>
+            </label>
+          </div>
+
+          <label>
+            Descripción *
+            <textarea
+              id="field-description"
+              name="description"
+              required
+              rows="4"
+              placeholder="Describe la incidencia con el máximo detalle posible..."
+            ></textarea>
+            <span class="field-error" id="error-description" aria-live="polite"></span>
+          </label>
+
+          <div class="form-actions">
+            <button type="submit" id="submit-btn">
+              <span class="btn-text">Registrar incidencia</span>
+              <span class="btn-loader" aria-hidden="true">
+                <span class="spinner"></span>
+                Enviando...
+              </span>
+            </button>
+          </div>
+
+          <p id="form-feedback" class="feedback" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <!-- ─── LISTADO DE INCIDENCIAS ─── -->
+      <section class="panel panel-table" id="list-panel">
+        <h2>Incidencias registradas</h2>
+        <div class="filters">
+          <label>
+            Estado
+            <select id="filter-status">
+              <option value="">Todos</option>
+              <option value="open">Abierta</option>
+              <option value="in_progress">En progreso</option>
+              <option value="resolved">Resuelta</option>
+              <option value="discarded">Descartada</option>
+            </select>
+          </label>
+          <label>
+            Origen
+            <select id="filter-origin">
+              <option value="">Todos</option>
+              <option value="customer">Cliente</option>
+              <option value="branch">Sede</option>
+              <option value="internal">Interno</option>
+            </select>
+          </label>
+          <label>
+            Sede
+            <select id="filter-branch">
+              <option value="">Todas</option>
+              <option value="Los Angeles">Los Ángeles</option>
+              <option value="Zaragoza">Zaragoza</option>
+              <option value="central">Central / Oficina Principal</option>
+              <option value="US Central">US Central</option>
+              <option value="Spain Central">Spain Central</option>
+            </select>
+          </label>
+          <label>
+            Categoría
+            <select id="filter-category">
+              <option value="">Todas</option>
+              <option value="queja">Queja</option>
+              <option value="solicitud">Solicitud</option>
+              <option value="fallo_operativo">Fallo operativo</option>
+            </select>
+          </label>
+          <button id="refresh-btn" type="button">Actualizar listado</button>
+        </div>
+        <p id="list-feedback" class="feedback" aria-live="polite"></p>
+
+        <!-- Estado: cargando -->
+        <div id="list-loading" class="list-state list-loading" hidden>
+          <span class="spinner spinner-dark" aria-hidden="true"></span>
+          <p>Cargando incidencias...</p>
+        </div>
+
+        <!-- Estado: error con opción de reintentar -->
+        <div id="list-error" class="list-state list-error" hidden>
+          <p class="list-error-msg">No se pudieron cargar las incidencias.</p>
+          <button id="retry-btn" type="button" class="action-btn warn">Reintentar</button>
+        </div>
+
+        <!-- Estado: vacío / sin resultados -->
+        <div id="list-empty" class="list-state list-empty" hidden>
+          <p class="empty-title">No hay incidencias para mostrar</p>
+          <p class="empty-subtitle" id="empty-subtitle">Prueba a ajustar los filtros o registra una nueva incidencia.</p>
+        </div>
+
+        <div class="table-scroll">
+          <table id="incidents-table">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Estado</th>
+                <th>Categoría</th>
+                <th>Origen</th>
+                <th>Sede</th>
+                <th>Creada</th>
+                <th>Actualizada</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="incidents-body"></tbody>
+          </table>
+        </div>
+
+        <!-- Paginación -->
+        <div id="pagination" class="pagination" hidden>
+          <button id="prev-page-btn" type="button" class="action-btn" disabled>← Anterior</button>
+          <span id="page-info" class="page-info">Página 1 de 1</span>
+          <button id="next-page-btn" type="button" class="action-btn" disabled>Siguiente →</button>
+        </div>
+      </section>
+
+      <!-- ─── RESUMEN / MÉTRICAS ─── -->
+      <section class="panel" id="summary-panel">
+        <h2>Resumen</h2>
+
+        <!-- Estado: cargando -->
+        <div id="summary-loading" class="summary-state" hidden>
+          <span class="spinner spinner-dark" aria-hidden="true"></span>
+          <p>Cargando métricas...</p>
+        </div>
+
+        <!-- Estado: error -->
+        <div id="summary-error" class="summary-state summary-state-error" hidden>
+          <p>No se pudieron cargar las métricas del resumen.</p>
+          <button id="summary-retry-btn" type="button" class="action-btn warn">Reintentar</button>
+        </div>
+
+        <!-- Estado: sin datos -->
+        <div id="summary-empty" class="summary-state" hidden>
+          <p>No hay datos suficientes para mostrar el resumen.</p>
+        </div>
+
+        <div id="summary-content" hidden>
+          <h3 class="summary-block-title">Por estado</h3>
+          <div class="summary-grid" id="summary-by-status">
+            <div class="summary-card status-total">
+              <span class="summary-label">Total</span>
+              <span class="summary-value" id="summary-total">0</span>
+            </div>
+            <div class="summary-card status-open">
+              <span class="summary-label">Abiertas</span>
+              <span class="summary-value" id="summary-open">0</span>
+            </div>
+            <div class="summary-card status-in_progress">
+              <span class="summary-label">En progreso</span>
+              <span class="summary-value" id="summary-in_progress">0</span>
+            </div>
+            <div class="summary-card status-resolved">
+              <span class="summary-label">Resueltas</span>
+              <span class="summary-value" id="summary-resolved">0</span>
+            </div>
+            <div class="summary-card status-discarded">
+              <span class="summary-label">Descartadas</span>
+              <span class="summary-value" id="summary-discarded">0</span>
+            </div>
+          </div>
+
+          <h3 class="summary-block-title">Por categoría</h3>
+          <div class="summary-grid" id="summary-by-category"></div>
+
+          <h3 class="summary-block-title">Por origen</h3>
+          <div class="summary-grid" id="summary-by-origin"></div>
+
+          <h3 class="summary-block-title">Por sede</h3>
+          <div class="summary-grid" id="summary-by-branch"></div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
