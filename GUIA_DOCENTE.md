@@ -29,7 +29,7 @@ echo 'EMAIL_FROM=Mi App <onboarding@resend.dev>' >> .env
 python3 seed.py
 
 # Iniciar backend
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ```bash
@@ -76,9 +76,14 @@ cd /workspaces/Hito-0-Compania
 python3 scripts/analyze.py scripts/incidents-COMPANY.csv
 ```
 
-## 3) Fase 2 — Talent Pipeline Tracker (API + Frontend)
+## 3) Fase 2 — API Unificada + Frontend
 
-> El proyecto `services/api/` contiene la API FastAPI (usuarios, perfiles, auth).  
+> El backend `services/api/main.py` es una **API unificada** que incluye:
+> - **Auth** (login, recuperación y cambio de contraseña)
+> - **Proveedores** (CRUD con TinyDB)
+> - **Análisis de incidencias** (subir CSV y descargar reporte)
+> - **Backoffice** montado en `/backoffice`
+>
 > El frontend está en `uis/talent-pipeline-tracker/` (Next.js App Router).
 
 Abrir dos terminales.
@@ -88,7 +93,7 @@ Abrir dos terminales.
 ```bash
 cd /workspaces/Hito-0-Compania/services/api
 source .venv/bin/activate
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Rutas a validar:
@@ -98,7 +103,11 @@ Rutas a validar:
 3. Forgot password: `POST /auth/forgot-password`
 4. Reset password: `POST /auth/reset-password`
 5. Change password: `POST /auth/change-password`
-6. Health: http://127.0.0.1:8000/
+6. Proveedores: `GET /suppliers` (json con 15 proveedores)
+7. Análisis incidencias: `POST /api/incidents/analyze`
+8. Exportar resultados: `GET /api/incidents/results/export`
+9. Backoffice: http://localhost:8000/backoffice/
+10. Health: http://127.0.0.1:8000/
 
 ### Terminal 2: Frontend (Next.js)
 
@@ -111,9 +120,10 @@ Abrir:
 
 - http://localhost:3000/login (login con email/contraseña)
 - http://localhost:3000/forgot-password (recuperación de contraseña)
+- http://localhost:8000/backoffice/ (proveedores + análisis de incidencias)
 
-> **Atención:** El frontend **no** es el backoffice antiguo (`uis/backoffice/`), es el nuevo en `uis/talent-pipeline-tracker/`.  
-> El backoffice antiguo ya no se usa para esta fase.
+> 💡 El backoffice (`uis/backoffice/`) se sirve directamente desde la API en `/backoffice/`.
+> Sirve para gestionar proveedores y analizar incidencias — **no requiere login**.
 
 ## 4) Flujo funcional esperado en interfaz
 
@@ -124,6 +134,15 @@ Abrir:
 5. Recibir el email (vía Resend) con el enlace de restablecimiento
 6. Abrir el enlace, elegir nueva contraseña, y redirige a `/login`
 7. Iniciar sesión con la nueva contraseña
+
+### Backoffice — Proveedores y análisis de incidencias
+
+1. Ir a http://localhost:8000/backoffice/
+2. Ver el listado de 15 proveedores con filtros por país/categoría
+3. Probar crear un proveedor, actualizar tarifa y cambiar estado
+4. Ir al panel de incidencias (`/backoffice/` arrastrar CSV en `scripts/incidents-COMPANY.csv`)
+5. Pulsar **Analizar**
+6. Pulsar **Descargar CSV** para exportar el reporte
 
 ## 5) Prueba rápida por curl (opcional)
 
@@ -137,6 +156,13 @@ curl -s -D- -X POST http://localhost:8000/auth/login \
 curl -s -X POST http://localhost:8000/auth/forgot-password \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@test.com"}'
+
+# Listar proveedores (no requiere token)
+curl -s http://localhost:8000/suppliers | python3 -m json.tool | head -20
+
+# Analizar incidencias (subir CSV de prueba)
+curl -s -X POST http://localhost:8000/api/incidents/analyze \
+  -F "file=@scripts/incidents-COMPANY.csv" | python3 -m json.tool | head -20
 ```
 
 ## 6) Si se prueba en Codespaces (URL pública)
