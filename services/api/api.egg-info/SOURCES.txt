@@ -19,3 +19,4 @@ app/schemas/__init__.py
 app/schemas/users.py
 app/services/__init__.py
 app/services/crud.py
+app/services/email_service.py

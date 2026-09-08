@@ -6,3 +6,4 @@ __pycache__/
 
 # Base de datos local
 suppliers_db.json
+data/db.json

@@ -1,3 +1,5 @@
+import hashlib
+import secrets
 from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, HTTPException
@@ -61,3 +63,12 @@ def get_current_user(
             status_code=401,
             detail="Token inválido o expirado"
         )
+
+
+def create_reset_token() -> str:
+    # Cadena aleatoria opaca; nunca se guarda en texto plano en la BD.
+    return secrets.token_urlsafe(32)
+
+
+def hash_reset_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
