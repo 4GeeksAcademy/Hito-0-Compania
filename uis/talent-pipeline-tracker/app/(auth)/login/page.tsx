@@ -1,7 +1,8 @@
 'use client';
 
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, Suspense, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 import FeedbackAlert from '@/src/components/FeedbackAlert';
 import { useAuth } from '@/src/context/AuthContext';
@@ -20,10 +21,12 @@ function FieldError({ field }: { field: string }) {
   );
 }
 
-export default function LoginPage() {
+function LoginForm() {
   const { login, error, loading, fieldErrors } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const searchParams = useSearchParams();
+  const resetSuccess = searchParams.get('resetSuccess') === '1';
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -71,6 +74,15 @@ export default function LoginPage() {
               </p>
             </div>
 
+            {resetSuccess && (
+              <div className="mb-6">
+                <FeedbackAlert
+                  message="Tu contraseña fue actualizada. Iniciá sesión con la nueva contraseña."
+                  variant="success"
+                />
+              </div>
+            )}
+
             {error && (
               <div className="mb-6">
                 <FeedbackAlert message={error} variant="error" />
@@ -108,6 +120,12 @@ export default function LoginPage() {
                   <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                     Contraseña
                   </label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs font-semibold text-[#1e3a8a] hover:text-[#152a6b] hover:underline underline-offset-2 transition-all"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </Link>
                 </div>
                 <div className="relative w-full">
                   {/* Icono SVG en lugar de fuente de Google */}
@@ -202,5 +220,13 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

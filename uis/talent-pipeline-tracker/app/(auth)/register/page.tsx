@@ -61,7 +61,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#f0f4ff] to-[#e8edff] flex flex-col items-center px-4 py-10 sm:py-16">
-      <div className="w-full max-w-md flex flex-col gap-6">
+      <div className="w-full max-w-2xl flex flex-col gap-6">
         
         {/* Branding */}
         <div className="text-center">
@@ -107,9 +107,6 @@ export default function RegisterPage() {
                   Correo electrónico <span className="text-red-500">*</span>
                 </label>
                 <div className="relative w-full">
-                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[20px]">
-                    mail
-                  </span>
                   <input
                     id="reg-email"
                     type="email"
@@ -118,7 +115,7 @@ export default function RegisterPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className={fieldErrors.email ? inputError : inputNormal}
-                    placeholder="ej: usuario@ejemplo.com"
+                    placeholder="Ejemplo: usuario@ejemplo.com"
                   />
                 </div>
                 <FieldError field="email" />
@@ -130,9 +127,6 @@ export default function RegisterPage() {
                   Contraseña <span className="text-red-500">*</span>
                 </label>
                 <div className="relative w-full">
-                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[20px]">
-                    lock
-                  </span>
                   <input
                     id="reg-password"
                     type="password"
@@ -154,9 +148,6 @@ export default function RegisterPage() {
                   Confirmar contraseña <span className="text-red-500">*</span>
                 </label>
                 <div className="relative w-full">
-                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[20px]">
-                    verified_user
-                  </span>
                   <input
                     id="reg-confirm"
                     type="password"
@@ -166,7 +157,7 @@ export default function RegisterPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className={inputNormal}
-                    placeholder="Repetí la contraseña"
+                    placeholder="Repetir la contraseña"
                   />
                 </div>
               </div>
@@ -187,9 +178,6 @@ export default function RegisterPage() {
                   Nombre completo
                 </label>
                 <div className="relative w-full">
-                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[20px]">
-                    person
-                  </span>
                   <input
                     id="reg-name"
                     type="text"
@@ -208,9 +196,6 @@ export default function RegisterPage() {
                   Teléfono
                 </label>
                 <div className="relative w-full">
-                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[20px]">
-                    phone
-                  </span>
                   <input
                     id="reg-phone"
                     type="tel"
@@ -229,9 +214,6 @@ export default function RegisterPage() {
                   Dirección
                 </label>
                 <div className="relative w-full">
-                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[20px]">
-                    home
-                  </span>
                   <input
                     id="reg-address"
                     type="text"
@@ -260,7 +242,6 @@ export default function RegisterPage() {
                 ) : (
                   <span className="flex items-center justify-center gap-2">
                     Crear cuenta
-                    <span className="material-symbols-outlined text-[18px]">person_add</span>
                   </span>
                 )}
               </button>

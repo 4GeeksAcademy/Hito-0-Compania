@@ -23,15 +23,19 @@ export function resolveApiBase(): string {
 
   const { protocol, hostname } = window.location;
 
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return `${protocol}//${hostname}:8000`;
-  }
-
+  // 1️⃣ Auto-detección para Codespaces: la URL del navegador es
+  //    https://<codespace-name>-3000.app.github.dev → backend en puerto 8000.
   if (hostname.endsWith('.app.github.dev')) {
     const apiHost = hostname.replace(/-\d+\.app\.github\.dev$/, '-8000.app.github.dev');
     return `${protocol}//${apiHost}`;
   }
 
+  // 2️⃣ Local: el backend corre en el mismo host, puerto 8000.
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `${protocol}//${hostname}:8000`;
+  }
+
+  // 3️⃣ Fallback: variable de entorno (útil en entornos custom).
   return process.env.NEXT_PUBLIC_AUTH_API_URL?.replace(/\/$/, '') ?? '';
 }
 
