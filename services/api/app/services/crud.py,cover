@@ -1,0 +1,96 @@
+> from tinydb import Query
+  
+> from app.core.database import profiles_table, reset_tokens_table, users_table
+  
+  
+> User = Query()
+> Profile = Query()
+> ResetToken = Query()
+  
+  
+> def get_user_by_id(user_id: str):
+>     return users_table.get(
+>         User.id == user_id
+>     )
+  
+  
+> def get_user_by_email(email: str):
+>     return users_table.get(
+>         User.email == email
+>     )
+  
+  
+> def get_all_users():
+>     return users_table.all()
+  
+  
+> def create_user(user: dict, profile: dict):
+>     users_table.insert(user)
+>     profiles_table.insert(profile)
+  
+>     return user
+  
+  
+> def update_user(user_id: str, changes: dict):
+>     users_table.update(
+>         changes,
+>         User.id == user_id
+>     )
+  
+>     return get_user_by_id(user_id)
+  
+  
+> def delete_user(user_id: str):
+>     users_table.remove(
+>         User.id == user_id
+>     )
+  
+>     profiles_table.remove(
+>         Profile.user_id == user_id
+>     )
+  
+  
+> def get_profile_by_user_id(user_id: str):
+>     return profiles_table.get(
+>         Profile.user_id == user_id
+>     )
+  
+  
+> def update_profile(user_id: str, changes: dict):
+>     profiles_table.update(
+>         changes,
+>         Profile.user_id == user_id
+>     )
+  
+>     return get_profile_by_user_id(user_id)
+  
+  
+> def invalidate_active_reset_tokens(user_id: str):
+>     reset_tokens_table.update(
+>         {"used": True},
+>         (ResetToken.user_id == user_id) & (ResetToken.used == False)
+>     )
+  
+  
+> def create_reset_token_record(user_id: str, token_hash: str, expires_at: str):
+>     reset_tokens_table.insert(
+>         {
+>             "user_id": user_id,
+>             "token_hash": token_hash,
+>             "expires_at": expires_at,
+>             "used": False,
+>         }
+>     )
+  
+  
+> def get_reset_token_by_hash(token_hash: str):
+>     return reset_tokens_table.get(
+>         ResetToken.token_hash == token_hash
+>     )
+  
+  
+> def mark_reset_token_used(token_doc_id: int):
+>     reset_tokens_table.update(
+>         {"used": True},
+>         doc_ids=[token_doc_id],
+>     )

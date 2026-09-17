@@ -11,7 +11,7 @@ class Role(str, Enum):
 
 class UserCreate(BaseModel):
     email: str
-    password: str
+    password: str = Field(min_length=8)
     name: Optional[str] = None
     phone: Optional[str] = None
     address: Optional[str] = None

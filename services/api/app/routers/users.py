@@ -164,6 +164,13 @@ def edit_user(
 
         changes["role"] = changes["role"].value
 
+    existing = get_user_by_id(user_id)
+    if not existing:
+        raise HTTPException(
+            status_code=404,
+            detail="Usuario no encontrado"
+        )
+
     user = update_user(
         user_id,
         changes
