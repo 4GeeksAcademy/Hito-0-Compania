@@ -15,8 +15,6 @@ const invalidByRuleEl = document.getElementById("invalid-by-rule");
 
 let currentFile = null;
 
-setInfo(`API detectada: ${API_BASE}`);
-
 fileInput.addEventListener("change", () => {
   currentFile = fileInput.files[0] ?? null;
   updateSelectedFile();
@@ -155,27 +153,21 @@ function setError(message) {
 }
 
 function resolveApiBase() {
-  const params = new URLSearchParams(window.location.search);
-  const explicitBase = params.get("apiBase");
-  if (explicitBase) {
-    return explicitBase.replace(/\/$/, "");
-  }
+  const queryBase = new URLSearchParams(window.location.search).get("apiBase");
+  if (queryBase) return queryBase.replace(/\/$/, "");
 
-  const { protocol, hostname, port, origin } = window.location;
+  const { protocol, hostname, port } = window.location;
 
-  if (hostname === "127.0.0.1" || hostname === "localhost") {
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
     return `${protocol}//${hostname}:8000`;
   }
 
-  if (port === "8080") {
-    return `${protocol}//${hostname}:8000`;
+  if (hostname.endsWith(".app.github.dev")) {
+    const codespacesApiHost = hostname.replace(/-\d+\.app\.github\.dev$/, "-8000.app.github.dev");
+    return `${protocol}//${codespacesApiHost}`;
   }
 
-  if (origin.includes("-8080.")) {
-    return origin.replace("-8080.", "-8000.");
-  }
-
-  return `${protocol}//${hostname}:8000`;
+  return "";
 }
 
 function escapeHtml(value) {

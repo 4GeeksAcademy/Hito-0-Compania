@@ -1,0 +1,1 @@
+"""shared — Common logic extracted from incident_analyzer for reuse across scripts."""

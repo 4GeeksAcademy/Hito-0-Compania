@@ -45,6 +45,17 @@ const formFeedback = document.getElementById("form-feedback");
 const countryInput = document.getElementById("country-input");
 const currencyInput = document.getElementById("currency-input");
 
+// Pagination refs
+const suppliersPagination = document.getElementById("suppliers-pagination");
+const suppliersPrevBtn = document.getElementById("suppliers-prev-btn");
+const suppliersNextBtn = document.getElementById("suppliers-next-btn");
+const suppliersPageInfo = document.getElementById("suppliers-page-info");
+
+// Pagination state
+let suppliersPage = 1;
+let suppliersTotalPages = 1;
+const SUPPLIERS_PAGE_SIZE = 10;
+
 function showFeedback(element, message, type = "") {
   element.textContent = message;
   element.className = `feedback ${type}`.trim();
@@ -182,29 +193,53 @@ function createRow(supplier) {
   return row;
 }
 
-function renderSuppliers(suppliers) {
+function renderSuppliers(suppliers, total) {
   suppliersBody.innerHTML = "";
 
   if (suppliers.length === 0) {
     const emptyRow = document.createElement("tr");
     emptyRow.innerHTML = '<td colspan="12">No hay proveedores para el filtro seleccionado.</td>';
     suppliersBody.appendChild(emptyRow);
+    suppliersPagination.hidden = true;
     return;
   }
 
   suppliers.forEach((supplier) => {
     suppliersBody.appendChild(createRow(supplier));
   });
+
+  renderSuppliersPagination(total);
+}
+
+function renderSuppliersPagination(total) {
+  if (suppliersTotalPages <= 1) {
+    suppliersPagination.hidden = true;
+    return;
+  }
+  suppliersPagination.hidden = false;
+  suppliersPageInfo.textContent = `Página ${suppliersPage} de ${suppliersTotalPages}`;
+  suppliersPrevBtn.disabled = suppliersPage <= 1;
+  suppliersNextBtn.disabled = suppliersPage >= suppliersTotalPages;
+
+  const start = (suppliersPage - 1) * SUPPLIERS_PAGE_SIZE + 1;
+  const end = Math.min(suppliersPage * SUPPLIERS_PAGE_SIZE, total);
+  showFeedback(listFeedback, `Mostrando ${start}-${end} de ${total} proveedor(es).`, "success");
 }
 
 async function loadSuppliers() {
   showFeedback(listFeedback, "Cargando proveedores...");
+
+  const params = readQueryParams();
+  const skip = (suppliersPage - 1) * SUPPLIERS_PAGE_SIZE;
+  params.set("skip", String(skip));
+  params.set("limit", String(SUPPLIERS_PAGE_SIZE));
+
+  const query = params.toString().length ? `?${params.toString()}` : "";
+
   try {
-    const params = readQueryParams();
-    const query = params.toString().length ? `?${params.toString()}` : "";
-    const suppliers = await request(`/suppliers${query}`);
-    renderSuppliers(suppliers);
-    showFeedback(listFeedback, `Mostrando ${suppliers.length} proveedor(es).`, "success");
+    const data = await request(`/suppliers${query}`);
+    suppliersTotalPages = Math.max(1, Math.ceil(data.total / SUPPLIERS_PAGE_SIZE));
+    renderSuppliers(data.items, data.total);
   } catch (error) {
     showFeedback(listFeedback, error.message, "error");
   }
@@ -281,6 +316,7 @@ function bindForm() {
       showFeedback(formFeedback, "Proveedor creado correctamente.", "success");
       supplierForm.reset();
       currencyInput.value = "USD";
+      suppliersPage = 1;
       await loadSuppliers();
     } catch (error) {
       showFeedback(formFeedback, error.message, "error");
@@ -288,11 +324,31 @@ function bindForm() {
   });
 }
 
-function bindFilters() {
-  countryFilter.addEventListener("change", loadSuppliers);
-  categoryFilter.addEventListener("change", loadSuppliers);
-  refreshBtn.addEventListener("click", loadSuppliers);
+function resetSuppliersPageAndReload() {
+  suppliersPage = 1;
+  loadSuppliers();
 }
+
+function bindFilters() {
+  countryFilter.addEventListener("change", resetSuppliersPageAndReload);
+  categoryFilter.addEventListener("change", resetSuppliersPageAndReload);
+  refreshBtn.addEventListener("click", resetSuppliersPageAndReload);
+}
+
+// Pagination events
+suppliersPrevBtn.addEventListener("click", () => {
+  if (suppliersPage > 1) {
+    suppliersPage -= 1;
+    loadSuppliers();
+  }
+});
+
+suppliersNextBtn.addEventListener("click", () => {
+  if (suppliersPage < suppliersTotalPages) {
+    suppliersPage += 1;
+    loadSuppliers();
+  }
+});
 
 function init() {
   buildFilters();
