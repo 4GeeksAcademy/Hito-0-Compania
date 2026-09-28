@@ -19,3 +19,6 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 EMAIL_FROM = os.getenv("EMAIL_FROM", "Mi App <onboarding@resend.dev>")
+
+# === Supabase (PostgreSQL) ===
+DATABASE_URL: str = os.getenv("DATABASE_URL", "")

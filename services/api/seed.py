@@ -16,7 +16,14 @@ from uuid import uuid4
 from passlib.hash import bcrypt
 from tinydb import Query, TinyDB
 
-from app.core.database import profiles_table, users_table
+from app.core.database import engine, get_db, profiles_table, users_table
+from sqlmodel import Session, select
+
+from app.models.inventory import InboundOrder, OutboundOrder, Product
+
+# ════════════════════════════════════════════
+# Seed data — Inventario (Supabase / SQLModel)
+# ════════════════════════════════════════════
 
 SEED_USERS = [
     {
@@ -221,6 +228,48 @@ SUPPLIERS_SEED = [
     },
 ]
 
+SEED_PRODUCTS = [
+    {
+        "name": "EcoBottle Pro",
+        "sku": "ECO-001",
+        "description": "Botella reutilizable de acero inoxidable 500ml",
+        "category": "hidratacion",
+    },
+    {
+        "name": "FitBand Watch",
+        "sku": "FIT-001",
+        "description": "Reloj inteligente con monitor de actividad fisica",
+        "category": "tecnologia",
+    },
+    {
+        "name": "Canvas Tote Bag",
+        "sku": "CAN-001",
+        "description": "Bolsa de tela reutilizable con asas largas",
+        "category": "accesorios",
+    },
+    {
+        "name": "Solar Charger 20W",
+        "sku": "SOL-001",
+        "description": "Cargador solar portatil de 20W con doble puerto USB",
+        "category": "tecnologia",
+    },
+]
+
+SEED_INBOUND: list[dict] = [
+    {"product_index": 0, "quantity": 100, "warehouse": "Los Angeles"},
+    {"product_index": 0, "quantity": 50,  "warehouse": "Zaragoza"},
+    {"product_index": 1, "quantity": 75,  "warehouse": "Los Angeles"},
+    {"product_index": 2, "quantity": 200, "warehouse": "Zaragoza"},
+    {"product_index": 3, "quantity": 30,  "warehouse": "Los Angeles"},
+]
+
+SEED_OUTBOUND: list[dict] = [
+    {"product_index": 0, "quantity": 20, "warehouse": "Los Angeles"},
+    {"product_index": 0, "quantity": 10, "warehouse": "Zaragoza"},
+    {"product_index": 1, "quantity": 15, "warehouse": "Los Angeles"},
+    {"product_index": 2, "quantity": 50, "warehouse": "Zaragoza"},
+]
+
 
 def clean():
     """Elimina todos los datos existentes."""
@@ -292,6 +341,60 @@ def seed_suppliers():
     db.close()
 
 
+def seed_inventory(db_session: Session, default_user_uuid: str) -> None:
+    """Inserta productos y ordenes de entrada/salida de prueba en Supabase.
+
+    Stock neto esperado:
+        EcoBottle Pro (ECO-001):  LA=80,  Zaragoza=40, Total=120
+        FitBand Watch (FIT-001):  LA=60,  Zaragoza=0,  Total=60
+        Canvas Tote Bag (CAN-001): LA=0,  Zaragoza=150, Total=150
+        Solar Charger 20W (SOL-001): LA=30, Zaragoza=0, Total=30
+    """
+
+    # ── Productos ──
+    products: list[Product] = []
+    for data in SEED_PRODUCTS:
+        existing = db_session.exec(
+            select(Product).where(Product.sku == data["sku"])
+        ).first()
+        if existing:
+            products.append(existing)
+            continue
+
+        product = Product(**data)
+        db_session.add(product)
+        db_session.flush()
+        db_session.refresh(product)
+        products.append(product)
+        print(f"   📦  {product.sku:<10} {product.name}")
+
+    # ── Ordenes de entrada ──
+    for entry in SEED_INBOUND:
+        product = products[entry["product_index"]]
+        order = InboundOrder(
+            product_id=product.id,
+            quantity=entry["quantity"],
+            warehouse=entry["warehouse"],
+            user_uuid=default_user_uuid,
+        )
+        db_session.add(order)
+
+    # ── Ordenes de salida ──
+    for entry in SEED_OUTBOUND:
+        product = products[entry["product_index"]]
+        order = OutboundOrder(
+            product_id=product.id,
+            quantity=entry["quantity"],
+            warehouse=entry["warehouse"],
+            user_uuid=default_user_uuid,
+        )
+        db_session.add(order)
+
+    db_session.commit()
+    print(f"   📥  {len(SEED_INBOUND)} ordenes de entrada")
+    print(f"   📤  {len(SEED_OUTBOUND)} ordenes de salida")
+
+
 def main():
     do_clean = "--clean" in sys.argv
 
@@ -300,6 +403,17 @@ def main():
 
     seed_users()
     seed_suppliers()
+
+    print("\n🏭  Sembrando inventario en Supabase...")
+    from app.core.database import engine
+    from sqlmodel import Session
+    from tinydb import Query
+
+    admin_user = users_table.get(Query().email == "admin@test.com")
+    default_user_uuid = admin_user["id"] if admin_user else str(uuid4())
+
+    with Session(engine) as db_session:
+        seed_inventory(db_session, default_user_uuid)
 
     print("\n📋  Resumen de credenciales de usuario:")
     print("   ┌─────────────────────┬──────────────┐")

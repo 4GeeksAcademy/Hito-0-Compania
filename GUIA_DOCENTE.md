@@ -442,3 +442,146 @@ curl -s -X POST http://127.0.0.1:8000/api/incidents \
 | **Frontend JS** | `uis/incident-manager/app.js` | Lógica: validación cliente, optimismo+rollback, estados loading/error/empty |
 | **Frontend CSS** | `uis/incident-manager/styles.css` | Estilos: badges, highlight, spinner, summary cards |
 | **Menú** | `uis/backoffice/index.html`, `index.html`, `application.html` | Enlace "Incidencias" en la navegación |
+
+---
+
+## 9) Hito — Gestión de Inventario con ORM y Doble Base de Datos
+
+> Este hito extiende la API existente añadiendo una **capa de inventario sobre Supabase (PostgreSQL)** usando **SQLModel**, mientras la autenticación permanece en **TinyDB**.
+
+### Preparación del entorno
+
+```bash
+cd /workspaces/Hito-0-Compania/services/api
+
+# Asegurar que las dependencias nuevas estén instaladas
+pip install sqlmodel psycopg2-binary
+```
+
+Verificar que el `.env` tenga la `DATABASE_URL` de Supabase (debería estar desde la configuración inicial):
+
+```bash
+grep DATABASE_URL .env
+# Debería mostrar algo como:
+# DATABASE_URL=postgresql://postgres.pqnxekdcfueynvidpsrc:...@aws-0-sa-east-1.pooler.supabase.com:6543/postgres
+```
+
+### Terminal 1: Iniciar backend
+
+```bash
+cd /workspaces/Hito-0-Compania/services/api
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Al iniciar, la aplicación ejecuta automáticamente `init_supabase()` que crea las tablas `products`, `inbound_orders` y `outbound_orders` en Supabase.
+
+### Terminal 2: Sembrar datos de prueba
+
+```bash
+cd /workspaces/Hito-0-Compania/services/api
+python seed.py --clean
+```
+
+Esto inserta:
+- Usuarios de prueba en **TinyDB** (admin, manager, etc.)
+- Proveedores en **TinyDB** (15 proveedores)
+- **4 productos + órdenes de entrada/salida** en **Supabase**
+
+Stock neto sembrado:
+
+| SKU | Producto | Los Ángeles | Zaragoza | Total |
+|:---:|----------|:-----------:|:--------:|:-----:|
+| ECO-001 | EcoBottle Pro | 80 | 40 | 120 |
+| FIT-001 | FitBand Watch | 60 | 0 | 60 |
+| CAN-001 | Canvas Tote Bag | 0 | 150 | 150 |
+| SOL-001 | Solar Charger 20W | 30 | 0 | 30 |
+
+### Prueba rápida por curl
+
+```bash
+# 1. Login (obtener token)
+TOKEN=$(curl -s -X POST http://localhost:8000/auth/login \
+  -d "username=admin@test.com&password=admin123" \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+echo "Token: $TOKEN"
+
+# 2. Listar todos los productos con stock calculado
+curl -s http://localhost:8000/inventory/products \
+  -H "Authorization: Bearer $TOKEN" | python3 -m json.tool
+
+# 3. Filtrar stock por almacén (Los Ángeles)
+curl -s "http://localhost:8000/inventory/products?warehouse=Los%20Angeles" \
+  -H "Authorization: Bearer $TOKEN" | python3 -m json.tool
+
+# 4. Obtener producto por ID
+curl -s http://localhost:8000/inventory/products/1 \
+  -H "Authorization: Bearer $TOKEN" | python3 -m json.tool
+
+# 5. Crear un nuevo producto
+curl -s -X POST http://localhost:8000/inventory/products \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test Product","sku":"TST-001","category":"test"}' | python3 -m json.tool
+
+# 6. Registrar orden de entrada
+curl -s -X POST http://localhost:8000/inventory/orders/inbound \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"product_id":1,"quantity":50,"warehouse":"Los Angeles"}' | python3 -m json.tool
+
+# 7. Registrar orden de salida
+curl -s -X POST http://localhost:8000/inventory/orders/outbound \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"product_id":1,"quantity":10,"warehouse":"Los Angeles"}' | python3 -m json.tool
+
+# 8. Probar validación de stock negativo (debe dar error HTTP 400)
+curl -s -X POST http://localhost:8000/inventory/orders/outbound \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"product_id":2,"quantity":9999,"warehouse":"Los Angeles"}' | python3 -m json.tool
+
+# 9. Listar todas las órdenes con datos del producto
+curl -s http://localhost:8000/inventory/orders \
+  -H "Authorization: Bearer $TOKEN" | python3 -m json.tool | head -40
+```
+
+### Prueba desde Swagger UI
+
+1. Abrir `http://localhost:8000/docs`
+2. Ir a `POST /auth/login` → usar `admin@test.com` / `admin123`
+3. Copiar el `access_token`
+4. Clic en **Authorize** → pegar `Bearer <token>` → **Authorize**
+5. Probar todos los endpoints agrupados bajo **inventory**
+
+### Endpoints de inventario disponibles
+
+| Método | Ruta | Descripción | Auth |
+| :---: | :--- | :--- | :---: |
+| `GET` | `/inventory/products` | Lista productos con `current_stock` (query opcional `?warehouse=`) | ✅ |
+| `POST` | `/inventory/products` | Crea un nuevo producto | ✅ |
+| `GET` | `/inventory/products/{id}` | Obtiene producto con stock actual | ✅ |
+| `POST` | `/inventory/orders/inbound` | Registra entrada (incrementa stock) | ✅ |
+| `POST` | `/inventory/orders/outbound` | Registra salida (reduce stock, valida negativo) | ✅ |
+| `GET` | `/inventory/orders` | Lista órdenes con datos del producto | ✅ |
+
+### Verificar reglas de negocio
+
+- **Stock calculado dinámicamente:** `GET /inventory/products` devuelve `current_stock` = entradas - salidas.
+- **Stock por almacén:** Usar `?warehouse=Los Angeles` o `?warehouse=Zaragoza`.
+- **Sin modificación directa:** No existe un endpoint `PATCH /inventory/products/{id}/stock`.
+- **Trazabilidad:** Cada orden contiene `user_uuid` del usuario autenticado.
+- **Sin overdraft:** Intentar una salida con cantidad mayor al stock disponible da `HTTP 400`.
+
+### Flujo de prueba completo sugerido
+
+1. Iniciar backend → `uvicorn app.main:app --reload`
+2. Sembrar datos → `python seed.py --clean`
+3. Login con `admin@test.com` / `admin123`
+4. `GET /inventory/products` → verificar stock inicial (ECO-001=120, FIT-001=60, etc.)
+5. `GET /inventory/products?warehouse=Zaragoza` → verificar solo stock de Zaragoza
+6. `POST /inventory/orders/inbound` → añadir stock a un producto
+7. `GET /inventory/products/1` → verificar que el stock aumentó
+8. `POST /inventory/orders/outbound` → reducir stock
+9. Intentar salida con cantidad excesiva → debe dar `400 Bad Request`
+10. `GET /inventory/orders` → ver listado completo con tipo, producto y usuario
