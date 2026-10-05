@@ -1,11 +1,22 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import auth, profiles, users
+from app.core.database import init_supabase
+from app.routers import auth, inventory, profiles, users
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: inicializar esquema en Supabase
+    init_supabase()
+    yield
 
 
 app = FastAPI(
-    title="Company API"
+    title="Company API",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -18,6 +29,7 @@ app.add_middleware(
 app.include_router(users.router)
 app.include_router(profiles.router)
 app.include_router(auth.router)
+app.include_router(inventory.router)
 
 
 @app.get("/")
