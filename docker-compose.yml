@@ -1,0 +1,89 @@
+# =============================================================================
+# docker-compose.yml — TrackFlow Monorepo
+# =============================================================================
+# Uso: docker compose up --build
+# =============================================================================
+
+services:
+  # ──────────────────────────────────────────────────────────────────────────
+  # Backend — FastAPI (services/)
+  # ──────────────────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./services
+      dockerfile: Dockerfile
+    container_name: trackflow-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Bind mount para recarga en caliente (--reload)
+      - ./services:/app/services
+      # Módulo compartido (packages/shared/py) necesario para incident_analyzer
+      - ./packages:/app/packages
+      # UI estática (incident-manager) servida como archivos estáticos en /incident-manager
+      - ./uis:/app/uis
+      # Scripts (incluye incidents-COMPANY.csv para seed automático de incidencias)
+      - ./scripts:/app/scripts
+    env_file:
+      - .env
+    environment:
+      # FRONTEND_URL se usa para construir enlaces de reset password que van
+      # en emails y los abre el navegador → debe ser accesible desde el host
+      FRONTEND_URL: http://localhost:3000
+    networks:
+      - trackflow-network
+    command: >
+      uvicorn services.api.main:app
+      --reload
+      --host 0.0.0.0
+      --port 8000
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Interfaces — Next.js (uis/)
+  # talent-pipeline-tracker (sitio público) → puerto 3000
+  # backoffice (panel interno)             → puerto 3001
+  # ──────────────────────────────────────────────────────────────────────────
+  interfaces:
+    build:
+      context: ./uis
+      dockerfile: Dockerfile
+    container_name: trackflow-interfaces
+    ports:
+      - "3000:3000"   # talent-pipeline-tracker (website)
+      - "3001:3001"   # backoffice
+    volumes:
+      # Bind mount para recarga en caliente (hot reload)
+      - ./uis:/app
+      # Anonimizar node_modules para que no se sobreescriban con el host
+      - /app/backoffice/node_modules
+      - /app/talent-pipeline-tracker/node_modules
+    env_file:
+      - .env
+    environment:
+      # Server-side (rewrites de Next.js dentro del contenedor)
+      # Usa nombre de servicio Docker para comunicación interna
+      NEXT_PUBLIC_INVENTORY_API_URL: http://backend:8000
+      # Server-side (SSR) y cliente (resolución dinámica por navegador)
+      # El servidor usa el nombre Docker; el navegador usa detección automática
+      NEXT_PUBLIC_AUTH_API_URL: http://backend:8000
+      # API externa de 4geeks (talent-pipeline-tracker) — accesible desde el
+      # navegador sin pasar por Docker
+      NEXT_PUBLIC_API_URL: https://playground.4geeks.com/tracker/api/v1
+    extra_hosts:
+      # Mapea 'backend' al host-gateway para que TCP funcione en entornos
+      # donde la red bridge Docker no permite comunicación entre contenedores
+      - "backend:host-gateway"
+      - "host.docker.internal:host-gateway"
+    
+    networks:
+      - trackflow-network
+    depends_on:
+      - backend
+
+# ──────────────────────────────────────────────────────────────────────────
+# Red compartida entre servicios
+# ──────────────────────────────────────────────────────────────────────────
+networks:
+  trackflow-network:
+    name: trackflow-network
+    driver: bridge
