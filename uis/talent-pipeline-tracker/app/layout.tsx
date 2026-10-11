@@ -16,7 +16,26 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Talent Pipeline Tracker",
-  description: "Sistema de gestión de candidatos",
+  description: "Sistema de gestión de candidatos — Panel de seguimiento de talento",
+  robots: { index: true, follow: true },
+  canonical: "https://trackflow.com/talent-pipeline",
+  openGraph: {
+    title: "Talent Pipeline Tracker",
+    description: "Sistema de gestión de candidatos — Panel de seguimiento de talento",
+    url: "https://trackflow.com/talent-pipeline",
+    siteName: "TrackFlow",
+    type: "website",
+    locale: "es",
+    images: [
+      {
+        url: "https://trackflow.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "TrackFlow Talent Pipeline",
+      },
+    ],
+  },
+  icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
 };
 
 export default function RootLayout({

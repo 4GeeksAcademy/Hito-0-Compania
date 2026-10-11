@@ -5,7 +5,9 @@ export const metadata: Metadata = {
   title: "Inventario | TrackFlow",
   description: "Gestión interna de stock y movimientos de almacén",
   robots: { index: true, follow: true },
-  canonical: "https://trackflow.com/backoffice/inventory",
+  alternates: {
+    canonical: "https://trackflow.com/backoffice/inventory",
+  },
   openGraph: {
     title: "Inventario | TrackFlow",
     description: "Gestión interna de stock y movimientos de almacén",
