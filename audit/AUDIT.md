@@ -31,18 +31,46 @@
 
 | Resultado observado | Posible causa raíz | Corrección propuesta |
 |---|---|---|
-| **LCP lento** en Talent Pipeline (🔴 5,2 s móvil / 🟡 2,8 s escritorio) | Google Fonts vía CSS `@import` bloqueante en `globals.css` (Inter + Material Symbols). El navegador descarga fonts externas antes de renderizar, sumando ~2-3 s. | Reemplazar `@import` por `next/font/google` (Geist ya precargado en `layout.tsx`). |
-| **CLS alto** en Talent Pipeline (🔴 0,23 móvil / 🟡 0,12 escritorio) | `globals.css` no define dimensiones explícitas para SVG ni favicon. El contenido dinámico (tabla de candidatos) tampoco reserva espacio. | Asignar `width`/`height`/`aspect-ratio` a recursos gráficos y reservar espacio para datos asíncronos. |
-| **SI en rojo** en Talent Pipeline (móvil y escritorio) | Favicon `.ico` de 26 KB y 6 SVGs en `public/` no referenciados pero servidos. | Reemplazar favicon por SVG de ~270 B y eliminar assets no utilizados. |
-| **SEO bajo** en ambos frontends (60-63) | Sin Open Graph, sin meta description específica por página, sin canonical ni robots. | Agregar `openGraph`, `robots` y `icons` en el `metadata` export de cada layout. |
-| **Código duplicado** — patrón fetch asíncrono | Backoffice y Talent Pipeline repiten el mismo patrón `loading`/`error`/`active` flag para llamadas API. | Extraer Custom Hook `useAsyncFetch` compartido en `packages/shared/`.
+| **LCP lento** (🔴 5,2 s móvil / 🟡 2,8 s escritorio) | Cadena de 3 peticiones cliente sincrónicas: `AuthContext` → `AuthGuard` (bloquea todo) → `fetchCandidates` con paginación secuencial (`getRecords` recorre N páginas con `await` una por una). Además, `page.tsx` es `'use client'` con diccionarios inline de ~180 líneas inflando el JS bundle inicial. | Migrar a server components o middleware de auth; paralelizar paginación con `Promise.all` o endpoint batch; mover i18n a archivos JSON separados. |
+| **CLS alto** (🔴 0,23 móvil / 🟡 0,12 escritorio) | 4 `<img>` sin `width`/`height` nativos (logo sidebar, icono header, foto perfil, avatares DiceBear por fila). El spinner de carga → tabla no reserva altura mínima. AuthGuard muestra spinner de 60vh y luego lo reemplaza por contenido. | Agregar `width`/`height` a todas las imágenes; reservar `min-height` en el contenedor de la tabla. |
+| **SI en rojo** (móvil y escritorio) | 3 imágenes remotas desde `lh3.googleusercontent.com` (logo duplicado en sidebar + header, foto perfil). Avatares DiceBear: 1 petición SVG por fila de candidatos. Sin assets locales en `public/`. | Self-hostear imágenes en `public/`; cachear avatares DiceBear; eliminar descarga duplicada del logo. |
+| **SEO bajo** (60-63 ambos frontends) | Ambos layouts tienen `openGraph`, `robots` e `icons`, pero **sin `canonical`** ni **`og:image`**. Sin Twitter Card. Mismo título/desc para todas las rutas (hereda el layout raíz). | Agregar `canonical` y `og:image` en metadata; considerar per-route metadata con `generateMetadata`. |
+| **Código duplicado** — patrón fetch asíncrono | Backoffice y Talent Pipeline repiten el mismo patrón `loading`/`error`/`active` flag para llamadas API con `fetch` + `cache: 'no-store'`. | Extraer Custom Hook `useAsyncFetch` compartido en `packages/shared/`.
+
+---
+
+## Puntuaciones finales (Lighthouse — DESPUÉS)
+
+| Página | Modo | Performance | Accessibility | Best Practices | SEO |
+|---|---:|---:|---:|---:|---:|
+| Backoffice `/backoffice/inventory/products` | Mobile | 97 | 100 | 100 | 63 |
+| Backoffice `/backoffice/inventory/products` | Desktop | 100 | 100 | 100 | 63 |
+| Talent Pipeline `/` | Mobile | 73 | 90 | 100 | 66 |
+| Talent Pipeline `/` | Desktop | 88 | 88 | 100 | 66 |
+
+### Resumen de impacto
+
+| Página / Modo | Perf. antes | Perf. después | Dif. | SEO antes | SEO después | Dif. |
+|---|---:|---:|---:|---:|---:|---:|
+| Backoffice Mobile | 94 | **97** | **+3** | 60 | **63** | **+3** |
+| Backoffice Desktop | 99 | **100** | **+1** | 60 | **63** | **+3** |
+| Talent Pipeline Mobile | 58 | **73** | **+15** | 63 | **66** | **+3** |
+| Talent Pipeline Desktop | 79 | **88** | **+9** | 63 | **66** | **+3** |
+
+---
+
+## Skills utilizadas
+
+| Skill | Versión | Propósito | Evidencia |
+|---|---|---|---|
+| `core-web-vitals` | 2.0 | Diagnosticar causas raíz de LCP, CLS e INP en Talent Pipeline. | SKILL.md en `.agents/skills/core-web-vitals/`. Se usaron referencias LCP, CLS e INP para verificar hallazgos. |
 
 ---
 
 ## Acciones correctivas
 
-- [ ] Quitar `@import` Google Fonts → usar `next/font` (ya precargado)
-- [ ] Reemplazar favicon 26 KB por SVG ~270 B
-- [ ] Eliminar SVGs no referenciados en `public/`
-- [ ] Agregar Open Graph + robots + canonical en layouts
-- [ ] Extraer hook `useAsyncFetch` compartido
+- [ ] **LCP:** Migrar auth a server component/middleware; paralelizar paginación; mover i18n a archivos JSON
+- [ ] **CLS:** Agregar `width`/`height` a imágenes; reservar `min-height` en tabla
+- [ ] **SI:** Self-hostear imágenes locales; cachear DiceBear; eliminar logo duplicado
+- [ ] **SEO:** Agregar `canonical` y `og:image` en ambos layouts
+- [ ] **Código duplicado:** Extraer Custom Hook `useAsyncFetch` compartido
