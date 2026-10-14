@@ -17,7 +17,7 @@
 
 - [x] Identificados **5 problemas raíz** con causa raíz documentada en `AUDIT.md`
 - [x] Identificado **código duplicado**: patrón fetch asíncrono (`loading`/`error`/`active` flag) repetido en ambos frontends
-- [ ] **Extraer al menos un componente reutilizable o Custom Hook** (pendiente: `useAsyncFetch`)
+- [x] **Extraer al menos un componente reutilizable o Custom Hook** (`useAsyncFetch` en `uis/backoffice/lib/useAsyncFetch.ts`)
 
 ---
 
@@ -35,12 +35,12 @@
 | 1 | 2026-10-11 | `ae0837c` | Agregar `width`/`height` a imágenes y `min-height` en tabla | Talent Pipeline | CLS |
 | 2 | 2026-10-14 | `351223c` | Agregar `alternates.canonical`, `og:image` e `icons` | Backoffice | SEO |
 | 3 | 2026-10-14 | `351223c` | Agregar `alternates.canonical` y `og:image` | Talent Pipeline | SEO |
+| 4 | 2026-10-14 | `463f558` | Extraer Custom Hook `useAsyncFetch` para patrón fetch duplicado | Backoffice | Refactorización |
 
 ### Pendientes (por prioridad)
 
 - [ ] **LCP:** Migrar auth a server component/middleware; paralelizar paginación; mover i18n a JSON
 - [ ] **SI:** Self-hostear imágenes locales en `public/`; cachear avatares DiceBear; eliminar logo duplicado
-- [ ] **Código duplicado:** Extraer Custom Hook `useAsyncFetch` compartido en `packages/shared/`
 
 ---
 
@@ -48,8 +48,8 @@
 
 - [x] Lighthouse ejecutado en **Talent Pipeline** (móvil + escritorio) ← 🟢 73/88 Perf
 - [x] Lighthouse ejecutado en **Backoffice** (móvil + escritorio) ← 🟢 97/100 Perf
-- [ ] Capturas guardadas en `audit/after/`
-- [ ] Commit de mediciones finales
+- [x] Capturas guardadas en `audit/after/`
+- [x] Commit de mediciones finales (`4434d7f`)
 
 ---
 
@@ -65,9 +65,9 @@
 
 | Criterio | Estado |
 |---|---|
-| Lighthouse ejecutado en ambos frontends antes/después con capturas | 🔴 Pendiente commit capturas + AUDIT.md |
+| Lighthouse ejecutado en ambos frontends antes/después con capturas | ✅ Capturas en `audit/before/` y `audit/after/` |
 | `AUDIT.md` identifica problemas concretos con causa raíz | ✅ Completado |
-| Al menos un componente reutilizable o Custom Hook extraído | 🔴 Pendiente |
+| Al menos un componente reutilizable o Custom Hook extraído | ✅ `useAsyncFetch` en `uis/backoffice/lib/useAsyncFetch.ts` |
 | `REPORT.md` muestra mejora medible en ≥1 puntuación por frontend | ✅ Completado (Perf +15, SEO +3 en ambos) |
 | Skills de agente instaladas con evidencia de uso | ✅ `core-web-vitals` documentada |
 | Correcciones atacan causas reales (imágenes, layout shift, hidratación) | ✅ CLS y SEO corregidos |

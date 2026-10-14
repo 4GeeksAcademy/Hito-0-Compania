@@ -39,6 +39,14 @@
 
 ---
 
+## Refactorización aplicada
+
+| Código duplicado | Dónde se repetía | Abstracción implementada | Archivos que la usan |
+|---|---|---|---|
+| Patrón fetch asíncrono (`loading`/`error`/`active` flag) | `products/page.tsx` y `orders/page.tsx` en Backoffice | Custom Hook `useAsyncFetch<T>(fetchFn, initial)` en `uis/backoffice/lib/useAsyncFetch.ts` | `products/page.tsx` y `orders/page.tsx` — ~16 líneas menos cada uno |
+
+---
+
 ## Puntuaciones finales (Lighthouse — DESPUÉS)
 
 | Página | Modo | Performance | Accessibility | Best Practices | SEO |

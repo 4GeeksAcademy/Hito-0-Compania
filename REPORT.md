@@ -67,6 +67,18 @@
 - **Abstracción implementada:** Pendiente — candidato `useAsyncFetch` en `packages/shared/`
 - **Archivos que la reutilizarían:** `uis/backoffice/app/*` y `uis/talent-pipeline-tracker/app/(protected)/page.tsx`
 
+### Refactorización — Custom Hook `useAsyncFetch`
+
+| Campo | Detalle |
+|---|---|
+| **Problema original** | El patrón `loading`/`error`/`active` flag con `useEffect` + `let active = true` aparecía duplicado en `products/page.tsx` y `orders/page.tsx`. |
+| **Causa raíz** | Cada página repetía el mismo boilerplate de estado asíncrono con cleanup de componente. |
+| **Archivo creado** | `uis/backoffice/lib/useAsyncFetch.ts` |
+| **Cambio realizado** | Custom Hook genérico `useAsyncFetch<T>(fetchFn, initial)` que encapsula el estado `{ data, loading, error }` y el cleanup automático al desmontar el componente. |
+| **Archivos que ahora lo usan** | `products/page.tsx` y `orders/page.tsx` — reducción de ~16 líneas cada uno. |
+| **Verificación funcional** | Build exitoso. La lógica de negocio no cambió: `listProducts()` y `listOrders()` se ejecutan igual, solo cambia quién gestiona el estado. |
+| **Commit** | `463f558` — `refactor(backoffice): extraer Custom Hook useAsyncFetch para patrón fetch duplicado` |
+
 ---
 
 ## Comparación Lighthouse
