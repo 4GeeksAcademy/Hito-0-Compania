@@ -18,7 +18,9 @@ export const metadata: Metadata = {
   title: "Talent Pipeline Tracker",
   description: "Sistema de gestión de candidatos — Panel de seguimiento de talento",
   robots: { index: true, follow: true },
-  canonical: "https://trackflow.com/talent-pipeline",
+  alternates: {
+    canonical: "https://trackflow.com/talent-pipeline",
+  },
   openGraph: {
     title: "Talent Pipeline Tracker",
     description: "Sistema de gestión de candidatos — Panel de seguimiento de talento",

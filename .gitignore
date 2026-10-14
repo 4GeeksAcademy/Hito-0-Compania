@@ -13,11 +13,6 @@ __pycache__/
 # === Datos locales ===
 data/db.json
 
-# === Guías locales (no subir al repo) ===
-TASK_PROGRESS.md
-ConsignaTarea.md
-Guia_4Geeks_Auditoria_Rendimiento_Monorepo.md
-
 # === Editor ===
 .vscode/
 *.swp
