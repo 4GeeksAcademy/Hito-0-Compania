@@ -6,13 +6,13 @@
 
 ## Resumen
 
-- **Frontends auditados:** Backoffice (`/backoffice/inventory/products`) y Talent Pipeline (`/`)
-- **Páginas medidas:** 2 páginas × 2 dispositivos (Mobile + Desktop) = 4 combinaciones
+- **Frontends auditados:** Backoffice (`/backoffice/inventory/products`) y Talent Pipeline (`/`, `/candidates/[id]`)
+- **Páginas medidas:** 3 páginas × 2 dispositivos (Mobile + Desktop) = 6 combinaciones
 - **Cambios principales:**
   1. `width`/`height` nativos en 5 imágenes de Talent Pipeline + `min-height` en contenedor de tabla
   2. `alternates.canonical`, `og:image`, `siteName` e `icons` en layout de Backoffice
   3. `alternates.canonical` y `og:image` en layout de Talent Pipeline
-- **Componente o Custom Hook extraído:** Pendiente — identificados 2 candidatos a refactorización
+- **Componente o Custom Hook extraído:** `useAsyncFetch` en `uis/backoffice/lib/useAsyncFetch.ts`
 
 ---
 
@@ -62,10 +62,10 @@
 ## Refactorización
 
 - **Casos de duplicación identificados:** 2
-  1. Patrón fetch asíncrono (`loading`/`error`/`active` flag) repetido en ambos frontends
-  2. Diccionarios i18n inline en `page.tsx` (~180 líneas) que deberían ser JSON separados
-- **Abstracción implementada:** Pendiente — candidato `useAsyncFetch` en `packages/shared/`
-- **Archivos que la reutilizarían:** `uis/backoffice/app/*` y `uis/talent-pipeline-tracker/app/(protected)/page.tsx`
+  1. **Patrón fetch asíncrono** (`loading`/`error`/`active` flag) repetido en `products/page.tsx` y `orders/page.tsx` del Backoffice.
+  2. **Diccionarios i18n inline** (~180 líneas en home, ~60 en `candidates/[id]/page.tsx`) con las mismas claves traducidas, repetidos en cada archivo `'use client'` de Talent Pipeline.
+- **Abstracción implementada:** Custom Hook `useAsyncFetch<T>(fetchFn, initial)` en `uis/backoffice/lib/useAsyncFetch.ts`
+- **Archivos que ahora la reutilizan:** `products/page.tsx` y `orders/page.tsx` — reducción de ~16 líneas cada uno
 
 ### Refactorización — Custom Hook `useAsyncFetch`
 
@@ -91,6 +91,8 @@
 | Backoffice Desktop | 99 | **100** | **+1** | 100 | 100 | 100 | 100 | 60 | **63** |
 | Talent Pipeline Mobile | 58 | **73** | **+15** | 90 | 90 | 100 | 100 | 63 | **66** |
 | Talent Pipeline Desktop | 79 | **88** | **+9** | 88 | 88 | 100 | 100 | 63 | **66** |
+| Talent Pipeline `/candidates/[id]` Mobile | 71 | **71** | **0** | 98 | 98 | 100 | 100 | 63 | **66** |
+| Talent Pipeline `/candidates/[id]` Desktop | 90 | **90** | **0** | 98 | 98 | 100 | 100 | 63 | **66** |
 
 ### Métricas Core Web Vitals
 
@@ -100,6 +102,8 @@
 | Backoffice Desktop | 🟢 1,2 s | 🟢 Óptimo | 🟢 0,0 | 🟢 Óptimo | 🟢 0 ms | 🟢 Óptimo |
 | Talent Pipeline Mobile | 🔴 5,2 s | 🟡 Naranja | 🔴 0,23 | 🟡 Naranja | 🟢 0 ms | 🟡 Naranja |
 | Talent Pipeline Desktop | 🟡 2,8 s | 🟡 Naranja | 🟡 0,12 | 🟡 Naranja | 🟢 1,0 s | 🟢 Verde |
+| Talent Pipeline `/candidates/[id]` Mobile | 🟡 Naranja | 🟡 Naranja | 🟢 0,0 | 🟢 Verde | 🟡 Naranja | 🟡 Naranja |
+| Talent Pipeline `/candidates/[id]` Desktop | 🟡 Naranja | 🟡 Naranja | 🟢 0,0 | 🟢 Verde | 🟢 0 ms | 🟢 Verde |
 
 ---
 
