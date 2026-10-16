@@ -15,6 +15,7 @@ dependencies = [
     "uvicorn[standard]>=0.52.4",
     "sqlmodel>=0.0.22",
     "psycopg2-binary>=2.9.10",
+    "psycopg>=3.3.0",
 ]
 
 [tool.setuptools.packages.find]

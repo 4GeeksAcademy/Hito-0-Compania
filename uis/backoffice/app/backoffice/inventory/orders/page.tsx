@@ -1,26 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { listOrders } from "../../../../lib/inventory";
+import { useAsyncFetch } from "../../../../lib/useAsyncFetch";
 import type { InventoryOrder } from "../../../../types/inventory";
 import styles from "../inventory.module.css";
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<InventoryOrder[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let active = true;
-    listOrders().then((items) => {
-      if (active) setOrders(items);
-    }).catch((failure: unknown) => {
-      if (active) setError(failure instanceof Error ? failure.message : "No se pudo cargar el historial.");
-    }).finally(() => {
-      if (active) setLoading(false);
-    });
-    return () => { active = false; };
-  }, []);
+  const { data: orders, loading, error } = useAsyncFetch(listOrders, [] as InventoryOrder[]);
 
   return (
     <>

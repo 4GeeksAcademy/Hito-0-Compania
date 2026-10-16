@@ -1,27 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { listProducts } from "../../../../lib/inventory";
+import { useAsyncFetch } from "../../../../lib/useAsyncFetch";
 import type { Product } from "../../../../types/inventory";
 import styles from "../inventory.module.css";
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let active = true;
-    listProducts().then((items) => {
-      if (active) setProducts(items);
-    }).catch((failure: unknown) => {
-      if (active) setError(failure instanceof Error ? failure.message : "No se pudo cargar el inventario.");
-    }).finally(() => {
-      if (active) setLoading(false);
-    });
-    return () => { active = false; };
-  }, []);
+  const { data: products, loading, error } = useAsyncFetch(listProducts, [] as Product[]);
 
   return (
     <>

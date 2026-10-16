@@ -508,6 +508,8 @@ export default function Page() {
             <img
               alt="TrackFlow Tech Logo"
               className="w-6 h-6 object-contain brightness-0 invert"
+              width={24}
+              height={24}
               src="https://lh3.googleusercontent.com/aida/AP1WRLuQnKTznPD7M2Ge0UAHUGS2bnE2YI3SsTXWqJ5e-op9_yLyrep3pKgqdJ0XCOI5ikEGfGspa6tqd-yp_aRubzuFbgjP4CAbfnTbJdhO82SFjvyy6ivaIy-hzNvlb7fIsumromyOd36CoBKHK2drazZZuDcySwwlBIWSo-w1wHg7EXfi2UeJeGn1yd18vWkzIlds8DTgP5zKB7DUgTuzdIdGCjuD4qbhwqGWbNB1SXDuMCOb-40aQTSGlmA"
             />
           </div>
@@ -579,6 +581,8 @@ export default function Page() {
               <img
                 alt="TrackFlow Icon"
                 className="w-6 h-6"
+                width={24}
+                height={24}
                 src="https://lh3.googleusercontent.com/aida/AP1WRLuQnKTznPD7M2Ge0UAHUGS2bnE2YI3SsTXWqJ5e-op9_yLyrep3pKgqdJ0XCOI5ikEGfGspa6tqd-yp_aRubzuFbgjP4CAbfnTbJdhO82SFjvyy6ivaIy-hzNvlb7fIsumromyOd36CoBKHK2drazZZuDcySwwlBIWSo-w1wHg7EXfi2UeJeGn1yd18vWkzIlds8DTgP5zKB7DUgTuzdIdGCjuD4qbhwqGWbNB1SXDuMCOb-40aQTSGlmA"
               />
               <span className="text-title-lg font-title-lg font-black text-primary truncate">TrackFlow Tech</span>
@@ -612,6 +616,8 @@ export default function Page() {
               <img
                 alt="User profile photo"
                 className="w-full h-full object-cover"
+                width={40}
+                height={40}
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWGZMtT76XMBgwRklhh9S68wuNAYfm3XGDQnxZOe4y5pN7mfjVbf4sJSViUTiuJl_TAreFkd3tYl2OtOd07nYlffzC9hnVA_Kxhp0K66p-25XjVeYUHHvhJkJlkCsGp6suRzYNvYJA1_VoPn-JWN120vgmoBnkWkWB7HB6yOfjQt3k6MZ15SBRK4HRicaa10qZZAf4d1Q8mihGqJPPZzB5-hy3A2JyFLHfxcjw1tvX1q71_qW7Iyd23-VBQT1naG2EXjrpNyZvkwM"
               />
             </div>
@@ -689,7 +695,7 @@ export default function Page() {
             <FeedbackAlert message={t.loadError + ': ' + error} variant="error" className="mb-lg p-md" />
           ) : null}
 
-          <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm w-full max-w-full min-w-0">
+          <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm w-full max-w-full min-w-0 min-h-[320px]">
             <div className="hidden xl:block overflow-x-auto">
               <table className="hidden w-full min-w-[980px] border-collapse text-left xl:table">
                 <thead className="bg-surface-container-low border-b border-outline-variant">
@@ -739,6 +745,8 @@ export default function Page() {
                                 <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden">
                                   <img
                                     className="w-full h-full object-cover"
+                                    width={40}
+                                    height={40}
                                     alt={name}
                                     src={'https://api.dicebear.com/9.x/initials/svg?seed=' + encodeURIComponent(name)}
                                   />
@@ -810,6 +818,8 @@ export default function Page() {
                           <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden shrink-0">
                             <img
                               className="w-full h-full object-cover"
+                              width={40}
+                              height={40}
                               alt={name}
                               src={'https://api.dicebear.com/9.x/initials/svg?seed=' + encodeURIComponent(name)}
                             />
