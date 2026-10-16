@@ -116,28 +116,28 @@ class TestCreateSupplier:
         assert data["notes"] is None
 
     def test_failure_invalid_category(self, client: TestClient) -> None:
-        """Modo fallo: categoría inválida devuelve 422."""
+        """Modo fallo: categoría inválida devuelve 400 (error handler custom)."""
         payload = {**_SUPPLIER_SEED, "categories": ["invalid_category"]}
         response = client.post("/suppliers", json=payload)
-        assert response.status_code == 422
+        assert response.status_code == 400
 
     def test_failure_currency_mismatch(self, client: TestClient) -> None:
-        """Modo fallo: USA con EUR devuelve 422."""
+        """Modo fallo: USA con EUR devuelve 400."""
         payload = {**_SUPPLIER_SEED, "currency": "EUR"}
         response = client.post("/suppliers", json=payload)
-        assert response.status_code == 422
+        assert response.status_code == 400
 
     def test_failure_empty_name(self, client: TestClient) -> None:
-        """Modo fallo: name vacío devuelve 422."""
+        """Modo fallo: name vacío devuelve 400."""
         payload = {**_SUPPLIER_SEED, "name": ""}
         response = client.post("/suppliers", json=payload)
-        assert response.status_code == 422
+        assert response.status_code == 400
 
     def test_failure_zero_rate(self, client: TestClient) -> None:
-        """Modo fallo: rate_per_shipment <= 0 devuelve 422."""
+        """Modo fallo: rate_per_shipment <= 0 devuelve 400."""
         payload = {**_SUPPLIER_SEED, "rate_per_shipment": 0}
         response = client.post("/suppliers", json=payload)
-        assert response.status_code == 422
+        assert response.status_code == 400
 
 
 # ────────────────────────────────────────────────────────────────
@@ -146,26 +146,32 @@ class TestCreateSupplier:
 
 class TestListSuppliers:
     def test_happy_path_returns_all(self, client: TestClient) -> None:
-        """Camino feliz: lista todos los suppliers."""
+        """Camino feliz: lista todos los suppliers (respuesta paginada)."""
         _seed_supplier(client)
         _seed_supplier(client, _SUPPLIER_SEED_SPAIN)
         response = client.get("/suppliers")
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 2
+        assert "items" in data
+        assert "total" in data
+        assert isinstance(data["items"], list)
+        assert len(data["items"]) == 2
+        assert data["total"] == 2
 
     def test_limit_case_filter_by_country(self, client: TestClient) -> None:
-        """Caso límite: filtrar por país."""
+        """Caso límite: filtrar por país (respuesta paginada)."""
         _seed_supplier(client)  # USA
         _seed_supplier(client, _SUPPLIER_SEED_SPAIN)  # Spain
         response = client.get("/suppliers?country=Spain")
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 1
-        assert data[0]["country"] == "Spain"
+        assert "items" in data
+        assert len(data["items"]) == 1
+        assert data["items"][0]["country"] == "Spain"
+        assert data["total"] == 1
 
     def test_limit_case_filter_by_category(self, client: TestClient) -> None:
-        """Caso límite: filtrar por categoría."""
+        """Caso límite: filtrar por categoría (respuesta paginada)."""
         usa_carrier = {**_SUPPLIER_SEED, "categories": ["carrier_last_mile"]}
         usa_packaging = {
             **_SUPPLIER_SEED,
@@ -177,19 +183,22 @@ class TestListSuppliers:
         response = client.get("/suppliers?category=packaging_materials")
         assert response.status_code == 200
         data = response.json()
-        assert len(data) == 1
-        assert data[0]["name"] == "Pack Co"
+        assert "items" in data
+        assert len(data["items"]) == 1
+        assert data["items"][0]["name"] == "Pack Co"
+        assert data["total"] == 1
 
     def test_limit_case_empty_list(self, client: TestClient) -> None:
-        """Caso límite: sin suppliers devuelve lista vacía."""
+        """Caso límite: sin suppliers devuelve paginación vacía."""
         response = client.get("/suppliers")
         assert response.status_code == 200
-        assert response.json() == []
+        data = response.json()
+        assert data == {"items": [], "total": 0, "skip": 0, "limit": 10}
 
     def test_failure_invalid_country_query(self, client: TestClient) -> None:
-        """Modo fallo: país inválido en query devuelve 422."""
+        """Modo fallo: país inválido en query devuelve 400."""
         response = client.get("/suppliers?country=Atlantis")
-        assert response.status_code == 422
+        assert response.status_code == 400
 
 
 # ────────────────────────────────────────────────────────────────
@@ -235,22 +244,22 @@ class TestUpdateRate:
         assert response.status_code == 404
 
     def test_failure_invalid_rate(self, client: TestClient) -> None:
-        """Modo fallo: tarifa <= 0 devuelve 422."""
+        """Modo fallo: rate_per_shipment <= 0 devuelve 400."""
         created = _seed_supplier(client)
         response = client.patch(
             f"/suppliers/{created['id']}/rate",
             json={"rate_per_shipment": 0},
         )
-        assert response.status_code == 422
+        assert response.status_code == 400
 
     def test_failure_extra_fields(self, client: TestClient) -> None:
-        """Modo fallo: campos extra en el body devuelven 422 (extra=forbid)."""
+        """Modo fallo: campos extra en el body devuelven 400 (extra=forbid)."""
         created = _seed_supplier(client)
         response = client.patch(
             f"/suppliers/{created['id']}/rate",
             json={"rate_per_shipment": 5.0, "name": "Hack"},
         )
-        assert response.status_code == 422
+        assert response.status_code == 400
 
 
 # ────────────────────────────────────────────────────────────────
@@ -280,13 +289,13 @@ class TestUpdateStatus:
         assert response.json()["status"] == "active"
 
     def test_failure_invalid_status(self, client: TestClient) -> None:
-        """Modo fallo: status inválido devuelve 422."""
+        """Modo fallo: status inválido devuelve 400."""
         created = _seed_supplier(client)
         response = client.patch(
             f"/suppliers/{created['id']}/status",
             json={"status": "unknown"},
         )
-        assert response.status_code == 422
+        assert response.status_code == 400
 
     def test_failure_not_found(self, client: TestClient) -> None:
         """Modo fallo: supplier inexistente."""

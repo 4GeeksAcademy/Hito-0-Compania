@@ -68,7 +68,7 @@ class TestRegister:
             "email": "shortpass@test.com",
             "password": "abc",
         })
-        assert response.status_code == 422
+        assert response.status_code == 400
 
 
 # ──────────────────────────────────────────────
