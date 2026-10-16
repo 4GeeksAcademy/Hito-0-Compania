@@ -15,6 +15,7 @@ from services.api.models import (
 	IncidentResponse,
 	IncidentStatusUpdate,
 	IncidentUpdate,
+	IncidentsSummaryResponse,
 	PaginatedIncidentResponse,
 )
 
@@ -115,7 +116,7 @@ def list_incidents(
 # que FastAPI interprete "summary" como un ID.
 
 
-@router.get("/summary")
+@router.get("/summary", response_model=IncidentsSummaryResponse)
 def incidents_summary() -> dict:
 	table = incidents_table
 	all_incidents = table.all()

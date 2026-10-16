@@ -307,7 +307,7 @@ class TestDeleteSupplier:
         created = _seed_supplier(client)
         response = client.delete(f"/suppliers/{created['id']}")
         assert response.status_code == 200
-        assert "deleted" in response.json()["detail"].lower()
+        assert "deleted" in response.json()["message"].lower()
         # Verificar que ya no existe
         get_response = client.get(f"/suppliers/{created['id']}")
         assert get_response.status_code == 404

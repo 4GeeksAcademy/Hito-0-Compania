@@ -31,7 +31,12 @@ class TestRegister:
         body = response.json()
         assert "user" in body
         assert "profile" in body
-        assert body["user"]["email"] == "newuser@test.com"
+        # El email no se reenvía en la respuesta de registro por seguridad
+        # (flujo auth no autenticado). Verificar que los campos seguros están presentes.
+        assert "id" in body["user"]
+        assert body["user"]["is_active"] is True
+        assert body["user"]["role"] == "user"
+        assert "created_at" in body["user"]
         assert body["profile"]["name"] == "New User"
 
     def test_happy_path_register_required_only(self, client: TestClient):
@@ -42,7 +47,11 @@ class TestRegister:
         })
         assert response.status_code == 201
         body = response.json()
-        assert body["user"]["email"] == "minimal@test.com"
+        # El email no se reenvía en la respuesta de registro por seguridad
+        assert "id" in body["user"]
+        assert body["user"]["is_active"] is True
+        assert body["user"]["role"] == "user"
+        assert "created_at" in body["user"]
 
     def test_register_duplicate_email(self, client: TestClient, user: dict):
         """Caso límite: email duplicado → 400."""

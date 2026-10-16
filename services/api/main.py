@@ -22,6 +22,13 @@ for path in (REPO_ROOT, CURRENT_DIR):
         sys.path.insert(0, path)
 
 # Importar rutas de proveedores e incidencias
+from services.api.models import (
+    AnalyzeResponse,
+    HealthResponse,
+    INCIDENT_CATEGORIES,
+    INCIDENT_ORIGINS,
+    INCIDENT_STATUSES,
+)
 from services.api.routes.suppliers import router as suppliers_router
 from services.api.routes.incidents import router as incidents_router
 
@@ -195,12 +202,12 @@ def _decode_csv(upload: UploadFile) -> str:
         ) from exc
 
 
-@app.get("/health")
+@app.get("/health", response_model=HealthResponse)
 def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.post("/api/incidents/analyze")
+@app.post("/api/incidents/analyze", response_model=AnalyzeResponse)
 def analyze_incidents_endpoint(file: UploadFile = File(...)) -> dict[str, Any]:
     csv_content = _decode_csv(file)
 
@@ -221,7 +228,12 @@ def analyze_incidents_endpoint(file: UploadFile = File(...)) -> dict[str, Any]:
     }
 
 
-@app.get("/api/incidents/results/export")
+@app.get("/api/incidents/results/export", responses={
+    200: {
+        "content": {"text/csv": {"schema": {"type": "string", "format": "binary"}}},
+        "description": "CSV file with analysis results.",
+    }
+})
 def export_last_results() -> StreamingResponse:
     if LAST_ANALYSIS is None:
         raise HTTPException(
