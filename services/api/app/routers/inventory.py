@@ -14,6 +14,8 @@ from app.schemas.inventory import (
     ProductResponse,
 )
 
+from cache import build_cache_key, get_cached, invalidate_cache, set_cached
+
 
 router = APIRouter(
     prefix="/inventory",
@@ -80,13 +82,24 @@ def list_products(
 
     El stock se calcula dinámicamente como entradas - salidas.
     Opcionalmente se puede filtrar por almacén.
+
+    Resultado cacheado con TTL de 30 segundos. Se invalida al crear
+    productos u órdenes de inventario.
     """
+    cache_key = build_cache_key("list_products", warehouse=warehouse)
+    cached = get_cached(cache_key)
+    if cached is not None:
+        return cached
+
     products = db_session.exec(select(Product)).all()
     items = [
         _product_to_response(p, db_session, warehouse=warehouse)
         for p in products
     ]
-    return PaginatedProductsResponse(items=items)
+    result = PaginatedProductsResponse(items=items)
+
+    set_cached(cache_key, result, ttl_seconds=30)
+    return result
 
 
 @router.post("/products", response_model=ProductResponse, status_code=201)
@@ -115,6 +128,8 @@ def create_product(
     db_session.add(product)
     db_session.commit()
     db_session.refresh(product)
+
+    invalidate_cache("list_products")
 
     return _product_to_response(product, db_session)
 
@@ -164,6 +179,8 @@ def create_inbound_order(
     db_session.commit()
     db_session.refresh(order)
 
+    invalidate_cache("list_products")
+
     return InboundOrderResponse(
         id=order.id,
         product_id=order.product_id,
@@ -212,6 +229,8 @@ def create_outbound_order(
     db_session.add(order)
     db_session.commit()
     db_session.refresh(order)
+
+    invalidate_cache("list_products")
 
     return OutboundOrderResponse(
         id=order.id,

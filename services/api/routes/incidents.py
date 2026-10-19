@@ -18,6 +18,8 @@ from services.api.models import (
 	PaginatedIncidentResponse,
 )
 
+from cache import build_cache_key, get_cached, invalidate_cache, set_cached
+
 
 router = APIRouter(prefix="/api/incidents", tags=["incidents"])
 
@@ -59,6 +61,8 @@ def create_incident(payload: IncidentCreate) -> IncidentResponse:
 	}
 
 	table.insert(record)
+
+	invalidate_cache("incidents_summary")
 
 	return _to_incident_response(record)
 
@@ -117,6 +121,16 @@ def list_incidents(
 
 @router.get("/summary")
 def incidents_summary() -> dict:
+	"""Devuelve métricas agregadas de todas las incidencias.
+
+	Resultado cacheado con TTL de 60 segundos. Se invalida al crear,
+	actualizar o eliminar una incidencia.
+	"""
+	cache_key = build_cache_key("incidents_summary")
+	cached = get_cached(cache_key)
+	if cached is not None:
+		return cached
+
 	table = incidents_table
 	all_incidents = table.all()
 
@@ -131,13 +145,16 @@ def incidents_summary() -> dict:
 		origin_counter[doc.get("origin", "unknown")] += 1
 		branch_counter[doc.get("branch", "unknown")] += 1
 
-	return {
+	result = {
 		"total": len(all_incidents),
 		"by_status": dict(status_counter),
 		"by_category": dict(category_counter),
 		"by_origin": dict(origin_counter),
 		"by_branch": dict(branch_counter),
 	}
+
+	set_cached(cache_key, result, ttl_seconds=60)
+	return result
 
 
 # ──────────────────────────────────────────────
@@ -187,6 +204,8 @@ def update_incident_status(incident_id: str, payload: IncidentStatusUpdate) -> I
 	updated_doc = table.get(lambda d: d.get("id") == incident_id)
 	if updated_doc is None:
 		raise HTTPException(status_code=500, detail="Error al actualizar el estado")
+
+	invalidate_cache("incidents_summary")
 
 	return _to_incident_response(updated_doc)
 
