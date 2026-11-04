@@ -5,7 +5,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from passlib.hash import bcrypt
 
 from app.core.security import get_current_user
-from app.schemas.users import UserCreate, UserUpdate
+from app.schemas.users import (
+    MessageResponse,
+    ProfileResponse,
+    UserCreate,
+    UserPublic,
+    UserRegistrationPublic,
+    UserRegistrationResponse,
+    UserUpdate,
+)
 from app.services.crud import (
     create_user,
     delete_user,
@@ -47,7 +55,7 @@ def owner_or_admin(
         )
 
 
-@router.post("", status_code=201)
+@router.post("", response_model=UserRegistrationResponse, status_code=201)
 def register(data: UserCreate):
 
     if get_user_by_email(data.email):
@@ -84,12 +92,17 @@ def register(data: UserCreate):
     )
 
     return {
-        "user": public_user(user),
+        "user": {
+            "id": user["id"],
+            "is_active": user["is_active"],
+            "role": user["role"],
+            "created_at": user["created_at"]
+        },
         "profile": profile
     }
 
 
-@router.get("")
+@router.get("", response_model=list[UserPublic])
 def list_users(
     current_user: dict = Depends(get_current_user)
 ):
@@ -99,7 +112,7 @@ def list_users(
     ]
 
 
-@router.get("/{user_id}")
+@router.get("/{user_id}", response_model=UserPublic)
 def get_user(
     user_id: str,
     current_user: dict = Depends(get_current_user)
@@ -120,7 +133,7 @@ def get_user(
     return public_user(user)
 
 
-@router.put("/{user_id}")
+@router.put("/{user_id}", response_model=UserPublic)
 def edit_user(
     user_id: str,
     data: UserUpdate,
@@ -179,7 +192,7 @@ def edit_user(
     return public_user(user)
 
 
-@router.delete("/{user_id}")
+@router.delete("/{user_id}", response_model=MessageResponse)
 def remove_user(
     user_id: str,
     current_user: dict = Depends(get_current_user)

@@ -14,6 +14,7 @@ from services.api.models import (
 	SupplierRateUpdate,
 	PaginatedSupplierResponse,
 )
+from app.schemas.users import MessageResponse
 
 
 router = APIRouter(prefix="/suppliers", tags=["suppliers"])
@@ -122,7 +123,7 @@ def update_supplier_status(
 		db.close()
 
 
-@router.delete("/{supplier_id}")
+@router.delete("/{supplier_id}", response_model=MessageResponse)
 def delete_supplier(supplier_id: int) -> dict[str, str]:
 	db, suppliers = get_suppliers_table()
 	try:
@@ -131,6 +132,6 @@ def delete_supplier(supplier_id: int) -> dict[str, str]:
 			raise HTTPException(status_code=404, detail="Supplier not found")
 
 		suppliers.remove(doc_ids=[supplier_id])
-		return {"detail": "Supplier deleted"}
+		return {"message": "Supplier deleted"}
 	finally:
 		db.close()

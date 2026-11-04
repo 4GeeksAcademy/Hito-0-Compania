@@ -45,16 +45,16 @@ class TestLogin:
             "username": user["email"],
             "password": "",
         })
-        # OAuth2PasswordRequestForm rechaza password vacío con 422
-        assert response.status_code == 422
+        # OAuth2PasswordRequestForm rechaza password vacío → error handler retorna 400
+        assert response.status_code == 400
 
     def test_login_empty_email(self, client: TestClient, user: dict):
-        """Caso límite: email vacío → 422 (validación OAuth2)."""
+        """Caso límite: email vacío → 400 (validación, error handler custom)."""
         response = client.post("/auth/login", data={
             "username": "",
             "password": "password123",
         })
-        assert response.status_code == 422
+        assert response.status_code == 400
 
     def test_login_wrong_password(self, client: TestClient, user: dict):
         """Modo fallo: contraseña incorrecta → 401."""
@@ -256,7 +256,7 @@ class TestResetPassword:
             "token": raw_token,
             "new_password": "abc",
         })
-        assert response.status_code == 422
+        assert response.status_code == 400
 
     def test_reset_password_invalid_token(self, client: TestClient):
         """Modo fallo: token inválido (no existe) → 400."""
@@ -339,7 +339,7 @@ class TestChangePassword:
         }, headers={
             "Authorization": f"Bearer {user_token}"
         })
-        assert response.status_code == 422
+        assert response.status_code == 400
 
     def test_change_password_no_auth(self, client: TestClient):
         """Modo fallo: sin autenticación → 401."""

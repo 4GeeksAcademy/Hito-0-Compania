@@ -14,8 +14,10 @@ from app.core.security import (
 from app.schemas.users import (
     ChangePasswordRequest,
     ForgotPasswordRequest,
+    LoginResponse,
     MessageResponse,
     ResetPasswordRequest,
+    UserSessionResponse,
 )
 from app.services.crud import (
     create_reset_token_record,
@@ -36,7 +38,7 @@ router = APIRouter(
 )
 
 
-@router.post("/login")
+@router.post("/login", response_model=LoginResponse)
 def login(
     form: OAuth2PasswordRequestForm = Depends()
 ):
@@ -70,7 +72,7 @@ def login(
     }
 
 
-@router.get("/me")
+@router.get("/me", response_model=UserSessionResponse)
 def get_me(
     current_user: dict = Depends(get_current_user)
 ):

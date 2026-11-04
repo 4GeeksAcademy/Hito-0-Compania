@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.core.security import get_current_user
-from app.schemas.users import ProfileUpdate
+from app.schemas.users import ProfileResponse, ProfileUpdate
 from app.services.crud import (
     get_profile_by_user_id,
     update_profile,
@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 
-@router.get("/me")
+@router.get("/me", response_model=ProfileResponse)
 def get_my_profile(
     current_user: dict = Depends(get_current_user)
 ):
@@ -31,7 +31,7 @@ def get_my_profile(
     return profile
 
 
-@router.put("/me")
+@router.put("/me", response_model=ProfileResponse)
 def edit_my_profile(
     data: ProfileUpdate,
     current_user: dict = Depends(get_current_user)

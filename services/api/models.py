@@ -220,3 +220,99 @@ class IncidentStatusUpdate(BaseModel):
                 f"Transición inválida: de '{current_status}' a '{self.status.value}'. "
                 f"Transiciones permitidas desde '{current_status}': {', '.join(allowed)}."
             )
+
+
+# ──────────────────────────────────────────────
+# Health & General Responses
+# ──────────────────────────────────────────────
+
+
+class HealthResponse(BaseModel):
+    """Response model for the health check endpoint."""
+
+    status: str
+
+
+# ──────────────────────────────────────────────
+# Incidents Summary
+# ──────────────────────────────────────────────
+
+
+class IncidentsSummaryResponse(BaseModel):
+    """Aggregated metrics for incidents."""
+
+    total: int
+    by_status: dict[str, int]
+    by_category: dict[str, int]
+    by_origin: dict[str, int]
+    by_branch: dict[str, int]
+
+
+# ──────────────────────────────────────────────
+# Analyze Response
+# ──────────────────────────────────────────────
+
+
+class AnalysisTotals(BaseModel):
+    """Totals section of the CSV analysis."""
+
+    total_rows: int
+    valid_rows: int
+    invalid_rows: int
+    error_count: int
+
+
+class AnalysisBreakdowns(BaseModel):
+    """Breakdowns section of the CSV analysis."""
+
+    by_category: dict[str, int]
+    by_status: dict[str, int]
+    by_country: dict[str, int]
+    by_priority: dict[str, int]
+    by_channel: dict[str, int]
+    invalid_by_rule: dict[str, int]
+
+
+class AnalysisKPIs(BaseModel):
+    """KPIs section of the CSV analysis."""
+
+    avg_resolution_hours: float | None = None
+    avg_resolution_hours_by_category: dict[str, float | None]
+    avg_satisfaction_closed: float | None = None
+
+
+class AnalysisIssue(BaseModel):
+    """A single validation issue found during analysis."""
+
+    row_number: int
+    rule: str
+    field: str
+    value: str | None = None
+
+
+class AnalysisSchema(BaseModel):
+    """Schema definition section of the CSV analysis."""
+
+    required_fields: list[str]
+    valid_categories: list[str]
+    valid_statuses: list[str]
+    valid_countries: list[str]
+    valid_priorities: list[str]
+    valid_channels: list[str]
+
+
+class AnalysisSummary(BaseModel):
+    """Full summary object returned by the analysis."""
+
+    schema_: AnalysisSchema = Field(alias="schema")
+    totals: AnalysisTotals
+    breakdowns: AnalysisBreakdowns
+    kpis: AnalysisKPIs
+    issues: list[AnalysisIssue]
+
+
+class AnalyzeResponse(BaseModel):
+    """Response model for the CSV incident analysis endpoint."""
+
+    analyzed_at: str
+    summary: AnalysisSummary

@@ -119,7 +119,7 @@ class TestAnalyzeIncidents:
     def test_failure_no_file(self, client: TestClient) -> None:
         """Modo fallo: sin archivo devuelve 422."""
         response = client.post("/api/incidents/analyze")
-        assert response.status_code == 422
+        assert response.status_code == 400
 
     def test_failure_not_csv(self, client: TestClient) -> None:
         """Modo fallo: archivo no CSV devuelve 415."""
