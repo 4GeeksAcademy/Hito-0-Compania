@@ -86,6 +86,22 @@ function LoginForm() {
             {error && (
               <div className="mb-6">
                 <FeedbackAlert message={error} variant="error" />
+                <div className="mt-3 flex items-center justify-center gap-4 text-xs text-gray-500">
+                  <button
+                    type="button"
+                    onClick={() => window.location.reload()}
+                    className="font-semibold text-[#1e3a8a] hover:text-[#152a6b] hover:underline underline-offset-2 transition-all"
+                  >
+                    Reintentar
+                  </button>
+                  <span className="text-gray-300">|</span>
+                  <Link
+                    href="/forgot-password"
+                    className="font-semibold text-[#1e3a8a] hover:text-[#152a6b] hover:underline underline-offset-2 transition-all"
+                  >
+                    ¿Problemas para ingresar? Restablecé tu contraseña
+                  </Link>
+                </div>
               </div>
             )}
 

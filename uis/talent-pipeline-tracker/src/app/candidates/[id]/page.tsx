@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
@@ -236,10 +236,7 @@ export default function CandidateDetailPage() {
     setLocale((prev) => (prev === 'es' ? 'en' : 'es'));
   }
 
-  useEffect(() => {
-    let active = true;
-
-    async function load() {
+  const loadCandidate = useCallback(async () => {
       if (!candidateId) {
         setError('No se encontró el ID del candidato.');
         setLoading(false);
@@ -255,8 +252,6 @@ export default function CandidateDetailPage() {
           trackerApi.getNotes(candidateId),
         ]);
 
-        if (!active) return;
-
         const statusOverrides = readStatusOverrides();
         const overriddenStatus = statusOverrides[candidateData.id];
 
@@ -267,22 +262,24 @@ export default function CandidateDetailPage() {
         );
         setNotes(notesData);
       } catch (loadError) {
-        if (active) {
-          setError(loadError instanceof Error ? loadError.message : 'Error al cargar el candidato.');
-        }
+        setError(loadError instanceof Error ? loadError.message : 'Error al cargar el candidato.');
       } finally {
-        if (active) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
-    }
+    }, [candidateId]);
 
-    load();
+  useEffect(() => {
+    let active = true;
+
+    (async () => {
+      await loadCandidate();
+      if (!active) return;
+    })();
 
     return () => {
       active = false;
     };
-  }, [candidateId]);
+  }, [loadCandidate]);
 
   useEffect(() => {
     if (!candidate) return;
@@ -460,7 +457,12 @@ export default function CandidateDetailPage() {
         ) : null}
 
         {error ? (
-          <FeedbackAlert message={error} variant="error" className="rounded-xl p-4" />
+          <FeedbackAlert
+            message={error}
+            variant="error"
+            className="rounded-xl p-4"
+            action={{ label: 'Reintentar', onClick: loadCandidate }}
+          />
         ) : null}
 
         {operationSuccess ? (
@@ -471,20 +473,20 @@ export default function CandidateDetailPage() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
             <section className="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-5 md:p-6 space-y-5">
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">{candidate.full_name}</h1>
-                <p className="mt-1 text-sm text-slate-600">{candidate.email}</p>
+                <h1 className="text-2xl font-bold text-slate-900">{candidate?.full_name ?? 'Candidato'}</h1>
+                <p className="mt-1 text-sm text-slate-600">{candidate?.email ?? ''}</p>
               </div>
 
               <div className="space-y-2 text-sm text-slate-700">
                 <p>
-                  <span className="font-semibold">{t.positionLabel}</span> {candidate.position}
+                  <span className="font-semibold">{t.positionLabel}</span> {candidate?.position ?? t.notAvailable}
                 </p>
                 <p>
-                  <span className="font-semibold">{t.phoneLabel}</span> {candidate.phone}
+                  <span className="font-semibold">{t.phoneLabel}</span> {candidate?.phone ?? t.notAvailable}
                 </p>
                 <p>
                   <span className="font-semibold">{t.linkedinLabel}</span>{' '}
-                  {candidate.linkedin_url ? (
+                  {candidate?.linkedin_url ? (
                     <a
                       href={candidate.linkedin_url}
                       target="_blank"
@@ -499,7 +501,7 @@ export default function CandidateDetailPage() {
                 </p>
                 <p>
                   <span className="font-semibold">{t.cvLabel}</span>{' '}
-                  {candidate.cv_url ? (
+                  {candidate?.cv_url ? (
                     <a
                       href={candidate.cv_url}
                       target="_blank"
@@ -513,10 +515,12 @@ export default function CandidateDetailPage() {
                   )}
                 </p>
                 <p>
-                  <span className="font-semibold">{t.experienceLabel}</span> {candidate.experience_years} {t.years}
+                  <span className="font-semibold">{t.experienceLabel}</span>{' '}
+                  {candidate?.experience_years ?? 0} {t.years}
                 </p>
                 <p>
-                  <span className="font-semibold">{t.appliedLabel}</span> {formatDate(candidate.applied_at, locale)}
+                  <span className="font-semibold">{t.appliedLabel}</span>{' '}
+                  {candidate?.applied_at ? formatDate(candidate.applied_at, locale) : t.notAvailable}
                 </p>
               </div>
 
@@ -524,7 +528,7 @@ export default function CandidateDetailPage() {
                 <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
                   {t.statusLabel}
                   <select
-                    value={candidate.status}
+                    value={candidate?.status ?? 'pending'}
                     onChange={(event) => handleStatusChange(event.target.value as CandidateStatus)}
                     disabled={savingStatus}
                     className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-blue-600"
@@ -540,7 +544,7 @@ export default function CandidateDetailPage() {
                 <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
                   {t.stageLabel}
                   <select
-                    value={candidate.stage}
+                    value={candidate?.stage ?? 'screening'}
                     onChange={(event) => handleStageChange(event.target.value as CandidateStage)}
                     disabled={savingStage}
                     className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-blue-600"

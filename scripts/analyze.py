@@ -47,6 +47,11 @@ def print_section(title: str) -> None:
     print("=" * 76)
 
 
+def log_error(message: str) -> None:
+    """Imprime un error informativo en stderr (no contamina el stdout)."""
+    print(f"Error: {message}", file=sys.stderr)
+
+
 def print_key_values(data: dict[str, object], label_width: int = 42) -> None:
     for key, value in data.items():
         print(f"{key:<{label_width}} : {value}")
@@ -60,10 +65,14 @@ def print_breakdown(title: str, data: dict[str, object]) -> None:
 
 def export_results_csv(output_path: Path, summary: dict[str, object]) -> None:
     rows = flatten_summary_to_rows(summary)
-    with output_path.open("w", encoding="utf-8", newline="") as output_file:
-        writer = csv.DictWriter(output_file, fieldnames=["section", "metric", "value"])
-        writer.writeheader()
-        writer.writerows(rows)
+    try:
+        with output_path.open("w", encoding="utf-8", newline="") as output_file:
+            writer = csv.DictWriter(output_file, fieldnames=["section", "metric", "value"])
+            writer.writeheader()
+            writer.writerows(rows)
+    except IOError as exc:
+        log_error(f"No se pudo escribir el archivo CSV en {output_path}: {exc}")
+        raise
 
 
 def ask_export() -> bool:
@@ -80,16 +89,35 @@ def main() -> int:
     csv_path = Path(args.csv_path)
     expected_path = Path(args.expected)
 
+    # ── Defensivo: validar entrada antes de procesar ──
     if not csv_path.exists():
-        print(f"Error: no existe el archivo CSV: {csv_path}")
+        log_error(f"no existe el archivo CSV: {csv_path}")
         return 1
 
-    csv_content = csv_path.read_text(encoding="utf-8")
+    if not csv_path.is_file():
+        log_error(f"la ruta no es un archivo: {csv_path}")
+        return 1
 
+    # ── Lectura de archivo ──
+    try:
+        csv_content = csv_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        log_error(f"no se pudo leer el archivo CSV ({exc})")
+        return 1
+
+    if not csv_content.strip():
+        log_error("el archivo CSV está vacío")
+        return 1
+
+    # ── Parseo ──
     try:
         rows = parse_incidents_csv(csv_content)
     except ValueError as exc:
-        print(f"Error de estructura CSV: {exc}")
+        log_error(f"estructura CSV inválida: {exc}")
+        return 1
+
+    if not rows:
+        log_error("el CSV no contiene filas de datos (solo cabeceras)")
         return 1
 
     summary = analyze_incidents(rows)
@@ -113,7 +141,12 @@ def main() -> int:
 
     print_section("VERIFICACION CONTRA VALORES ESPERADOS")
     if expected_path.exists():
-        expected = json.loads(expected_path.read_text(encoding="utf-8"))
+        try:
+            expected = json.loads(expected_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            log_error(f"no se pudo leer el archivo expected ({exc})")
+            return 1
+
         mismatches = compare_expected(summary, expected)
         if mismatches:
             print("Resultado: FALLA")
@@ -124,12 +157,15 @@ def main() -> int:
             print("Resultado: OK (coincide exactamente con valores esperados)")
             status_code = 0
     else:
-        print(f"Advertencia: no se encontro archivo expected en {expected_path}")
+        log_error(f"no se encontró el archivo expected en {expected_path}")
         status_code = 1
 
     if ask_export():
         output_path = Path(os.getcwd()) / "results.csv"
-        export_results_csv(output_path, summary)
+        try:
+            export_results_csv(output_path, summary)
+        except Exception:
+            return 1
         print(f"Resultados exportados en: {output_path}")
     else:
         print("Exportacion omitida.")

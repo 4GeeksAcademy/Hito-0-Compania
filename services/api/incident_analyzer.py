@@ -150,8 +150,13 @@ def flatten_summary_to_rows(summary: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def write_summary_json(summary: dict[str, Any], output_path: str) -> None:
-    with open(output_path, "w", encoding="utf-8") as output_file:
-        json.dump(summary, output_file, indent=2, ensure_ascii=False)
+    try:
+        with open(output_path, "w", encoding="utf-8") as output_file:
+            json.dump(summary, output_file, indent=2, ensure_ascii=False)
+    except IOError as exc:
+        raise RuntimeError(
+            f"No se pudo escribir el archivo de salida en la ruta especificada."
+        ) from exc
 
 
 def compare_expected(summary: dict[str, Any], expected: dict[str, Any]) -> list[str]:

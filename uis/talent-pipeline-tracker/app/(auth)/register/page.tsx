@@ -97,6 +97,15 @@ export default function RegisterPage() {
             {!hasFieldErrors && (fieldError || error) && (
               <div className="mb-6">
                 <FeedbackAlert message={fieldError || error!} variant="error" />
+                <div className="mt-3 text-center">
+                  <button
+                    type="button"
+                    onClick={() => { setFieldError(null); }}
+                    className="text-xs font-semibold text-[#1e3a8a] hover:text-[#152a6b] hover:underline underline-offset-2 transition-all"
+                  >
+                    Reintentar
+                  </button>
+                </div>
               </div>
             )}
 
