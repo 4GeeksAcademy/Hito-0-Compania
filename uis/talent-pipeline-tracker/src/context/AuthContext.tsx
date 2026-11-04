@@ -29,6 +29,7 @@ import {
 
 type AuthAction =
   | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'CLEAR_LOADING' }
   | { type: 'SET_USER'; payload: UserSession }
   | { type: 'SET_TOKEN'; payload: string | null }
   | { type: 'SET_ERROR'; payload: string | null }
@@ -40,6 +41,8 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
     case 'SET_LOADING':
       return { ...state, loading: action.payload, error: null, fieldErrors: {} };
+    case 'CLEAR_LOADING':
+      return { ...state, loading: false };
     case 'SET_USER':
       return { ...state, user: action.payload, loading: false };
     case 'SET_TOKEN':
@@ -133,6 +136,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const message = err instanceof Error ? err.message : 'Error al iniciar sesión';
           dispatch({ type: 'SET_ERROR', payload: message });
         }
+      } finally {
+        // Asegurar que loading siempre se limpie sin borrar el error
+        dispatch({ type: 'CLEAR_LOADING' });
       }
     },
     [router],
@@ -159,6 +165,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const message = err instanceof Error ? err.message : 'Error al registrarse';
           dispatch({ type: 'SET_ERROR', payload: message });
         }
+      } finally {
+        // Asegurar que loading siempre se limpie sin borrar el error
+        dispatch({ type: 'CLEAR_LOADING' });
       }
     },
     [router],
@@ -187,6 +196,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const message = err instanceof Error ? err.message : 'Error al actualizar perfil';
           dispatch({ type: 'SET_ERROR', payload: message });
         }
+      } finally {
+        dispatch({ type: 'CLEAR_LOADING' });
       }
     },
     [],

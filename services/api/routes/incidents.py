@@ -39,6 +39,17 @@ def _to_incident_response(doc: dict) -> IncidentResponse:
 	})
 
 
+def _get_incident(table, incident_id: str) -> dict:
+	"""Busca una incidencia por id. Devuelve None si no existe."""
+	try:
+		return table.get(lambda d: d.get("id") == incident_id)
+	except Exception as exc:
+		raise HTTPException(
+			status_code=500,
+			detail="Error interno al leer la base de datos.",
+		) from exc
+
+
 # ──────────────────────────────────────────────
 # POST /incidents — Crear incidencia
 # ──────────────────────────────────────────────
@@ -61,7 +72,13 @@ def create_incident(payload: IncidentCreate) -> IncidentResponse:
 		"updated_at": now,
 	}
 
-	table.insert(record)
+	try:
+		table.insert(record)
+	except Exception as exc:
+		raise HTTPException(
+			status_code=500,
+			detail="Error interno al guardar la incidencia.",
+		) from exc
 
 	invalidate_cache("incidents_summary")
 
@@ -85,7 +102,13 @@ def list_incidents(
 	limit: int = Query(default=10, ge=1, le=100, description="Max records per page"),
 ) -> PaginatedIncidentResponse:
 	table = incidents_table
-	results = table.all()
+	try:
+		results = table.all()
+	except Exception as exc:
+		raise HTTPException(
+			status_code=500,
+			detail="Error interno al leer la base de datos.",
+		) from exc
 
 	# Filters
 	if category is not None:
@@ -133,7 +156,13 @@ def incidents_summary() -> dict:
 		return cached
 
 	table = incidents_table
-	all_incidents = table.all()
+	try:
+		all_incidents = table.all()
+	except Exception as exc:
+		raise HTTPException(
+			status_code=500,
+			detail="Error interno al leer la base de datos.",
+		) from exc
 
 	status_counter: Counter[str] = Counter()
 	category_counter: Counter[str] = Counter()
@@ -167,7 +196,7 @@ def incidents_summary() -> dict:
 def get_incident(incident_id: str) -> IncidentResponse:
 	table = incidents_table
 
-	doc = table.get(lambda d: d.get("id") == incident_id)
+	doc = _get_incident(table, incident_id)
 
 	if doc is None:
 		raise HTTPException(status_code=404, detail="Incidencia no encontrada")
@@ -184,7 +213,7 @@ def get_incident(incident_id: str) -> IncidentResponse:
 def update_incident_status(incident_id: str, payload: IncidentStatusUpdate) -> IncidentResponse:
 	table = incidents_table
 
-	existing = table.get(lambda d: d.get("id") == incident_id)
+	existing = _get_incident(table, incident_id)
 
 	if existing is None:
 		raise HTTPException(status_code=404, detail="Incidencia no encontrada")
@@ -197,19 +226,21 @@ def update_incident_status(incident_id: str, payload: IncidentStatusUpdate) -> I
 		raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 	now = datetime.now(timezone.utc).isoformat()
-	table.update(
-		{"status": payload.status.value, "updated_at": now},
-		lambda d: d.get("id") == incident_id,
-	)
+	try:
+		table.update(
+			{"status": payload.status.value, "updated_at": now},
+			lambda d: d.get("id") == incident_id,
+		)
+	except Exception as exc:
+		raise HTTPException(
+			status_code=500,
+			detail="Error interno al actualizar la incidencia.",
+		) from exc
 
-	updated_doc = table.get(lambda d: d.get("id") == incident_id)
+	updated_doc = _get_incident(table, incident_id)
 	if updated_doc is None:
 		raise HTTPException(status_code=500, detail="Error al actualizar el estado")
 
 	invalidate_cache("incidents_summary")
 
 	return _to_incident_response(updated_doc)
-
-	table.remove(lambda doc: doc.get("id") == incident_id)
-
-	return {"detail": "Incidencia eliminada"}

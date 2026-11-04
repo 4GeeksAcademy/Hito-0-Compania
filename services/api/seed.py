@@ -6,6 +6,7 @@ Uso directo:
     uv run python seed.py                    # Carga los datos
     uv run python seed.py --clean            # Limpia y carga los datos
     uv run python seed.py --include-incidents  # Incluye incidencias desde CSV
+    uv run python seed.py --show-passwords    # Muestra contraseñas de prueba
 
 Uso programático:
     from seed import seed_all
@@ -74,6 +75,11 @@ _COUNTRY_TO_BRANCH = {
 # ════════════════════════════════════════════
 # Seed data — Inventario (Supabase / SQLModel)
 # ════════════════════════════════════════════
+
+
+def log_error(message: str) -> None:
+    """Imprime un error informativo en stderr (no contamina el stdout)."""
+    print(f"❌ Error: {message}", file=sys.stderr)
 
 SEED_USERS = [
     {
@@ -323,16 +329,24 @@ SEED_OUTBOUND: list[dict] = [
 
 def clean():
     """Elimina todos los datos existentes."""
-    users_table.truncate()
-    profiles_table.truncate()
-    
+    try:
+        users_table.truncate()
+        profiles_table.truncate()
+    except Exception as exc:
+        log_error(f"no se pudo limpiar la base de datos principal: {exc}")
+        raise
+
     # Limpia también la base de proveedores si existe
     db_path = Path(__file__).resolve().parent / "suppliers_db.json"
     if db_path.exists():
-        db = TinyDB(db_path)
-        db.table("suppliers").truncate()
-        db.close()
-        
+        try:
+            db = TinyDB(db_path)
+            db.table("suppliers").truncate()
+            db.close()
+        except Exception as exc:
+            log_error(f"no se pudo limpiar la base de proveedores: {exc}")
+            raise
+
     print("🗑️  Base de datos limpiada")
 
 
@@ -367,9 +381,14 @@ def seed_users():
             "address": data["address"],
         }
 
-        users_table.insert(user)
-        profiles_table.insert(profile)
+        try:
+            users_table.insert(user)
+            profiles_table.insert(profile)
+        except Exception as exc:
+            log_error(f"no se pudo insertar el usuario {data['email']}: {exc}")
+            raise
         inserted_count += 1
+
         print(f"✅  {data['email']:<20} → role: {data['role']}")
 
     print(f"\n🎉  {inserted_count} usuarios nuevos creados (de {len(SEED_USERS)} definidos)")
@@ -378,23 +397,34 @@ def seed_users():
 def seed_suppliers():
     """Inserta los datos de prueba para proveedores."""
     db_path = Path(__file__).resolve().parent / "suppliers_db.json"
-    db = TinyDB(db_path)
-    suppliers_table = db.table("suppliers")
+
+    try:
+        db = TinyDB(db_path)
+        suppliers_table = db.table("suppliers")
+    except Exception as exc:
+        log_error(f"no se pudo abrir la base de proveedores ({db_path}): {exc}")
+        raise
+
     supplier = Query()
 
     inserted_count = 0
 
-    for item in SUPPLIERS_SEED:
-        exists = suppliers_table.contains(
-            (supplier.name == item["name"]) & (supplier.country == item["country"])
-        )
-        if exists:
-            continue
+    try:
+        for item in SUPPLIERS_SEED:
+            exists = suppliers_table.contains(
+                (supplier.name == item["name"]) & (supplier.country == item["country"])
+            )
+            if exists:
+                continue
 
-        new_item = item.copy()
-        new_item["updated_at"] = datetime.now(timezone.utc).isoformat()
-        suppliers_table.insert(new_item)
-        inserted_count += 1
+            new_item = item.copy()
+            new_item["updated_at"] = datetime.now(timezone.utc).isoformat()
+            suppliers_table.insert(new_item)
+            inserted_count += 1
+    except Exception as exc:
+        log_error(f"no se pudieron insertar los proveedores: {exc}")
+        db.close()
+        raise
 
     print(f"📦  Seeder de proveedores completado. Registros insertados: {inserted_count}")
     db.close()
@@ -592,15 +622,25 @@ def seed_all(*, include_incidents: bool = True, verbose: bool = True) -> None:
     print("\n✅  Seed completado. Todos los datos están listos.")
 
 
-def main():
+def main() -> int:
     do_clean = "--clean" in sys.argv
     include_incidents = "--include-incidents" in sys.argv
+    show_passwords = "--show-passwords" in sys.argv
 
-    if do_clean:
-        clean()
+    try:
+        if do_clean:
+            clean()
+        seed_all(include_incidents=include_incidents, verbose=show_passwords)
+    except Exception as exc:
+        log_error(f"el seed falló: {exc}")
+        return 1
 
-    seed_all(include_incidents=include_incidents)
+    if not show_passwords:
+        print("\n🔒  Las contraseñas no se muestran por seguridad. "
+              "Usá `--show-passwords` solo en desarrollo.")
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

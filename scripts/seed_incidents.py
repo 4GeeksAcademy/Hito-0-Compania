@@ -59,6 +59,11 @@ def get_csv_ref(csv_row: dict[str, str]) -> str:
     return f"csv:{csv_row.get('incident_id', '')}"
 
 
+def log_error(message: str) -> None:
+    """Imprime un error informativo en stderr (no contamina el stdout)."""
+    print(f"❌ Error: {message}", file=sys.stderr)
+
+
 def row_to_incident(csv_row: dict[str, str]) -> dict | None:
     """Transform a valid CSV row into an incident record for TinyDB."""
     csv_status = csv_row["status"]
@@ -113,7 +118,11 @@ def row_to_incident(csv_row: dict[str, str]) -> dict | None:
 
 def already_seeded(table, csv_ref: str) -> bool:
     """Check if a csv_ref already exists in the database."""
-    return len(table.search(lambda doc: doc.get("csv_ref") == csv_ref)) > 0
+    try:
+        return len(table.search(lambda doc: doc.get("csv_ref") == csv_ref)) > 0
+    except Exception as exc:
+        log_error(f"no se pudo consultar la base de datos para '{csv_ref}': {exc}")
+        raise
 
 
 def main() -> int:
@@ -134,20 +143,42 @@ def main() -> int:
 
     csv_path = Path(args.csv)
 
+    # ── Defensivo: validar entrada antes de procesar ──
     if not csv_path.exists():
-        print(f"❌ Error: no se encuentra el fichero CSV: {csv_path}")
+        log_error(f"no se encuentra el fichero CSV: {csv_path}")
         return 1
 
-    csv_content = csv_path.read_text(encoding="utf-8")
+    if not csv_path.is_file():
+        log_error(f"la ruta no es un archivo: {csv_path}")
+        return 1
+
+    # ── Lectura de archivo ──
+    try:
+        csv_content = csv_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        log_error(f"no se pudo leer el archivo CSV ({exc})")
+        return 1
+
+    if not csv_content.strip():
+        log_error("el archivo CSV está vacío")
+        return 1
 
     # Parse CSV rows
     try:
         rows = parse_incidents_csv(csv_content)
     except ValueError as exc:
-        print(f"❌ Error de estructura CSV: {exc}")
+        log_error(f"estructura CSV inválida: {exc}")
         return 1
 
-    table = incidents_table
+    if not rows:
+        log_error("el CSV no contiene filas de datos (solo cabeceras)")
+        return 1
+
+    try:
+        table = incidents_table
+    except Exception as exc:
+        log_error(f"no se pudo conectar con la base de datos: {exc}")
+        return 1
     inserted = 0
     skipped_invalid = 0
     skipped_duplicate = 0
@@ -167,7 +198,13 @@ def main() -> int:
             continue
 
         # Transform
-        incident = row_to_incident(csv_row)
+        try:
+            incident = row_to_incident(csv_row)
+        except Exception as exc:
+            log_error(f"error al transformar fila {row_number}: {exc}")
+            skipped_invalid += 1
+            continue
+
         if incident is None:
             skipped_invalid += 1
             invalid_details.append(
@@ -178,17 +215,25 @@ def main() -> int:
 
         # Idempotency check
         csv_ref = incident["csv_ref"]
-        if already_seeded(table, csv_ref):
-            skipped_duplicate += 1
-            continue
+        try:
+            if already_seeded(table, csv_ref):
+                skipped_duplicate += 1
+                continue
+        except Exception:
+            return 1
 
         if args.dry_run:
             print(f"  🔍 [DRY-RUN] Se insertaría: {incident['title']} ({csv_ref})")
             inserted += 1
             continue
 
-        # Insert
-        table.insert(incident)
+        # Insert - envuelto en try/except
+        try:
+            table.insert(incident)
+        except Exception as exc:
+            log_error(f"no se pudo insertar la fila {row_number} ('{incident['title']}'): {exc}")
+            return 1
+
         inserted += 1
 
     # ── Report ─────────────────────────────────
