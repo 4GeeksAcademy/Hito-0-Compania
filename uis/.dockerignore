@@ -1,0 +1,20 @@
+# ──────────────────────────────────────────────
+# .dockerignore — Interfaces (uis/)
+# ──────────────────────────────────────────────
+
+# Dependencias (se instalan dentro del contenedor)
+node_modules/
+
+# Caché de Next.js
+.next/
+
+# Archivos de entorno (secretos, config local)
+.env*
+!.env.example
+
+# Logs
+*.log
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db

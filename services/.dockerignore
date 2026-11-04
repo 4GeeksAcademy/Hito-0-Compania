@@ -1,0 +1,30 @@
+# ──────────────────────────────────────────────
+# .dockerignore — Backend API (services/)
+# ──────────────────────────────────────────────
+
+# Caché de Python y artefactos de compilación
+__pycache__/
+*.pyc
+*.pyo
+
+# Entorno virtual
+.venv/
+venv/
+
+# Archivos de entorno (secretos, config local)
+.env*
+!.env.example
+
+# Tests (no necesarios en producción/desarrollo con bind mount)
+tests/
+
+# Logs
+*.log
+
+# Cobertura de tests
+.coverage
+htmlcov/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db

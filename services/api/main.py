@@ -6,6 +6,7 @@ import logging
 import os
 import sys
 import time
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -36,8 +37,27 @@ from services.api.routes.incidents import router as incidents_router
 
 from incident_analyzer import analyze_incidents, flatten_summary_to_rows, parse_incidents_csv
 from app.routers import auth as auth_router
+from app.routers import inventory as inventory_router
 from app.routers import profiles as profiles_router
 from app.routers import users as users_router
+from app.core.database import init_supabase
+
+
+@asynccontextmanager
+async def _lifespan(app: FastAPI):
+    """Inicializa tablas y siembra datos de prueba al arrancar."""
+    # 1. Crear tablas de inventario (SQLite/SQLModel)
+    init_supabase()
+
+    # 2. Sembrar datos semilla (idempotente — no duplica)
+    try:
+        from services.api.seed import seed_all
+        seed_all(include_incidents=True, verbose=False)
+    except Exception as exc:
+        # No debe impedir el arranque del servidor
+        print(f"⚠️  Error en seed automático (el servidor igual funciona): {exc}")
+
+    yield
 
 from cache import invalidate_cache
 
@@ -51,7 +71,7 @@ logger = logging.getLogger("api.timing")
 
 
 # Inicialización de FastAPI
-app = FastAPI(title="TrackFlow Unified API", version="1.0.0")
+app = FastAPI(title="TrackFlow Unified API", version="1.0.0", lifespan=_lifespan)
 
 
 # ──────────────────────────────────────────────
@@ -189,6 +209,8 @@ def global_exception_handler(_request, exc: Exception) -> JSONResponse:
 app.include_router(auth_router.router)
 app.include_router(users_router.router)
 app.include_router(profiles_router.router)
+# Inventario — rutas protegidas (productos y órdenes con SQLModel + Supabase)
+app.include_router(inventory_router.router)
 # Proveedores — acceso público (no requiere login)
 app.include_router(suppliers_router)
 # Incidencias — acceso público (no requiere login)

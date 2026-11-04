@@ -1,0 +1,16 @@
+# =============================================================================
+# TrackFlow API — Dependencias
+# =============================================================================
+# Generado a partir de pyproject.toml. Mantener sincronizado.
+# =============================================================================
+
+fastapi>=0.141.1
+libpass[bcrypt]>=1.9.3
+python-dotenv>=1.2.3
+python-jose[cryptography]>=3.5.0
+python-multipart>=0.0.32
+resend>=2.0.0
+tinydb>=4.9.0
+uvicorn[standard]>=0.52.4
+sqlmodel>=0.0.22
+psycopg2-binary>=2.9.10

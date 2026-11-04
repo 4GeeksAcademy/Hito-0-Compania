@@ -1,13 +1,21 @@
 """
-Seed data — pobla la base de datos con usuarios, perfiles y proveedores de prueba.
+Seed data — pobla la base de datos con usuarios, perfiles, proveedores,
+inventario e incidencias de prueba.
 
-Uso:
-    uv run python seed.py              # Carga los datos
-    uv run python seed.py --clean      # Limpia y carga los datos
+Uso directo:
+    uv run python seed.py                    # Carga los datos
+    uv run python seed.py --clean            # Limpia y carga los datos
+    uv run python seed.py --include-incidents  # Incluye incidencias desde CSV
+
+Uso programático:
+    from seed import seed_all
+    seed_all()                               # Todo incluido
 """
 
 from __future__ import annotations
 
+import csv
+import io
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -16,10 +24,52 @@ from uuid import uuid4
 from passlib.hash import bcrypt
 from tinydb import Query, TinyDB
 
-from app.core.database import engine, get_db, profiles_table, users_table
+from app.core.database import (
+    engine,
+    get_db,
+    incidents_table,
+    profiles_table,
+    users_table,
+)
 from sqlmodel import Session, select
 
 from app.models.inventory import InboundOrder, OutboundOrder, Product
+
+# ──────────────────────────────────────────────
+# Incidencias — importaciones de shared
+# ──────────────────────────────────────────────
+try:
+    from shared.csv_validation import (  # type: ignore[import-untyped]
+        CSV_CATEGORY_TO_INCIDENT,
+        CSV_STATUS_TO_INCIDENT,
+        parse_incidents_csv,
+        _validate_row,
+    )
+except ImportError:
+    # Fallback: buscar en packages/shared/py
+    _shared_dir = (Path(__file__).resolve().parents[2] / "packages" / "shared" / "py").resolve()
+    if _shared_dir.exists():
+        sys.path.insert(0, str(_shared_dir))
+        from shared.csv_validation import (  # type: ignore[import-untyped]
+            CSV_CATEGORY_TO_INCIDENT,
+            CSV_STATUS_TO_INCIDENT,
+            parse_incidents_csv,
+            _validate_row,
+        )
+    else:
+        CSV_CATEGORY_TO_INCIDENT = {}
+        CSV_STATUS_TO_INCIDENT = {}
+        parse_incidents_csv = None  # type: ignore[assignment]
+        _validate_row = None  # type: ignore[assignment]
+
+# ── Ruta al CSV de incidencias ──
+_INCIDENTS_CSV_PATH = Path(__file__).resolve().parents[2] / "scripts" / "incidents-COMPANY.csv"
+
+# ── Country → branch mapping ──
+_COUNTRY_TO_BRANCH = {
+    "US": "US Central",
+    "ES": "Spain Central",
+}
 
 # ════════════════════════════════════════════
 # Seed data — Inventario (Supabase / SQLModel)
@@ -287,8 +337,17 @@ def clean():
 
 
 def seed_users():
-    """Inserta los datos de prueba para usuarios y perfiles."""
+    """Inserta los datos de prueba para usuarios y perfiles. Idempotente."""
+    user_query = Query()
+    inserted_count = 0
+
     for data in SEED_USERS:
+        # Idempotent: saltar si ya existe
+        existing = users_table.get(user_query.email == data["email"])
+        if existing:
+            print(f"⏭️  {data['email']:<20} → ya existe")
+            continue
+
         user_id = str(uuid4())
 
         user = {
@@ -310,10 +369,10 @@ def seed_users():
 
         users_table.insert(user)
         profiles_table.insert(profile)
-
+        inserted_count += 1
         print(f"✅  {data['email']:<20} → role: {data['role']}")
 
-    print(f"\n🎉  {len(SEED_USERS)} usuarios creados")
+    print(f"\n🎉  {inserted_count} usuarios nuevos creados (de {len(SEED_USERS)} definidos)")
 
 
 def seed_suppliers():
@@ -395,19 +454,119 @@ def seed_inventory(db_session: Session, default_user_uuid: str) -> None:
     print(f"   📤  {len(SEED_OUTBOUND)} ordenes de salida")
 
 
-def main():
-    do_clean = "--clean" in sys.argv
+def seed_incidents():
+    """Inserta incidencias históricas desde el CSV. Idempotente (por csv_ref)."""
+    csv_path = _INCIDENTS_CSV_PATH
 
-    if do_clean:
-        clean()
+    if not csv_path.exists():
+        print("⚠️   Archivo CSV de incidencias no encontrado → saltando seed de incidencias")
+        print(f"    Buscado en: {csv_path}")
+        return
 
+    if parse_incidents_csv is None:
+        print("⚠️   Módulo shared.csv_validation no disponible → saltando seed de incidencias")
+        return
+
+    csv_content = csv_path.read_text(encoding="utf-8")
+
+    try:
+        rows = parse_incidents_csv(csv_content)
+    except ValueError as exc:
+        print(f"❌  Error de estructura CSV: {exc}")
+        return
+
+    table = incidents_table
+    inserted = 0
+    skipped_invalid = 0
+    skipped_duplicate = 0
+
+    for idx, csv_row in enumerate(rows):
+        row_number = idx + 2
+
+        issues = _validate_row(csv_row, row_number)
+        if issues:
+            skipped_invalid += 1
+            continue
+
+        # Transform CSV row to incident record
+        csv_status = csv_row["status"]
+        csv_category = csv_row["category"]
+        incident_status = CSV_STATUS_TO_INCIDENT.get(csv_status)
+        incident_category = CSV_CATEGORY_TO_INCIDENT.get(csv_category)
+
+        if incident_status is None or incident_category is None:
+            skipped_invalid += 1
+            continue
+
+        # Title: first 80 chars of description
+        description = csv_row["description"]
+        title_candidate = description.strip()
+        if len(title_candidate) > 80:
+            truncated = title_candidate[:80]
+            last_dot = truncated.rfind(".")
+            if last_dot > 20:
+                title_candidate = truncated[: last_dot + 1]
+            else:
+                title_candidate = truncated + "…"
+        if not title_candidate:
+            title_candidate = f"Incidencia {csv_row.get('incident_id', 'desconocida')}"
+
+        # Date parsing
+        try:
+            created_dt = datetime.strptime(csv_row["created_at"], "%Y-%m-%d")
+            created_at = created_dt.replace(tzinfo=timezone.utc).isoformat()
+        except ValueError:
+            created_at = datetime.now(timezone.utc).isoformat()
+
+        branch = _COUNTRY_TO_BRANCH.get(csv_row["country"], "central")
+        now = datetime.now(timezone.utc).isoformat()
+        csv_ref = f"csv:{csv_row.get('incident_id', '')}"
+
+        # Idempotency check
+        if len(table.search(lambda doc: doc.get("csv_ref") == csv_ref)) > 0:
+            skipped_duplicate += 1
+            continue
+
+        record = {
+            "id": str(uuid4()),
+            "title": title_candidate,
+            "description": description,
+            "category": incident_category,
+            "status": incident_status,
+            "origin": "customer",
+            "branch": branch,
+            "created_at": created_at,
+            "updated_at": now,
+            "csv_ref": csv_ref,
+        }
+
+        table.insert(record)
+        inserted += 1
+
+    total = len(rows)
+    print(f"📋  Incidencias: {inserted} insertadas, {skipped_invalid} inválidas, "
+          f"{skipped_duplicate} duplicadas (de {total} en CSV)")
+
+
+def seed_all(*, include_incidents: bool = True, verbose: bool = True) -> None:
+    """Ejecuta todos los seeders en orden. Idempotente.
+
+    Args:
+        include_incidents: Si True, carga también las incidencias desde el CSV.
+        verbose: Si True, imprime el resumen de credenciales.
+    """
+    print("🌱  Seed — Inicio")
+    print("═" * 40)
+
+    # 1. Usuarios y perfiles
     seed_users()
+
+    # 2. Proveedores
     seed_suppliers()
 
-    print("\n🏭  Sembrando inventario en Supabase...")
-    from app.core.database import engine
+    # 3. Inventario (requiere admin user)
+    print("\n🏭  Sembrando inventario...")
     from sqlmodel import Session
-    from tinydb import Query
 
     admin_user = users_table.get(Query().email == "admin@test.com")
     default_user_uuid = admin_user["id"] if admin_user else str(uuid4())
@@ -415,13 +574,32 @@ def main():
     with Session(engine) as db_session:
         seed_inventory(db_session, default_user_uuid)
 
-    print("\n📋  Resumen de credenciales de usuario:")
-    print("   ┌─────────────────────┬──────────────┐")
-    print("   │ Email               │ Contraseña   │")
-    print("   ├─────────────────────┼──────────────┤")
-    for data in SEED_USERS:
-        print(f"   │ {data['email']:<20} │ {data['password']:<12} │")
-    print("   └─────────────────────┴──────────────┘")
+    # 4. Incidencias (desde CSV)
+    if include_incidents:
+        print()
+        seed_incidents()
+
+    # 5. Resumen
+    if verbose:
+        print("\n📋  Resumen de credenciales de usuario:")
+        print("   ┌─────────────────────┬──────────────┐")
+        print("   │ Email               │ Contraseña   │")
+        print("   ├─────────────────────┼──────────────┤")
+        for data in SEED_USERS:
+            print(f"   │ {data['email']:<20} │ {data['password']:<12} │")
+        print("   └─────────────────────┴──────────────┘")
+
+    print("\n✅  Seed completado. Todos los datos están listos.")
+
+
+def main():
+    do_clean = "--clean" in sys.argv
+    include_incidents = "--include-incidents" in sys.argv
+
+    if do_clean:
+        clean()
+
+    seed_all(include_incidents=include_incidents)
 
 
 if __name__ == "__main__":
