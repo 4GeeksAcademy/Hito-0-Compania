@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createInboundOrder, createOutboundOrder, getProduct, InventoryApiError, listProducts } from "../../lib/inventory";
 import type { Product, Warehouse } from "../../types/inventory";
 import styles from "../../app/backoffice/inventory/inventory.module.css";
@@ -50,8 +50,19 @@ export default function OrderForm({ direction }: { direction: "inbound" | "outbo
     return () => { active = false; };
   }, [outbound, productId, warehouse]);
 
-  const currentStock = stock?.productId === productId && stock.warehouse === warehouse ? stock.value : null;
-  const exceedsStock = outbound && currentStock !== null && quantity !== "" && Number(quantity) > currentStock;
+  const currentStock = useMemo(
+    () => stock?.productId === productId && stock.warehouse === warehouse ? stock.value : null,
+    [stock, productId, warehouse],
+  );
+  const exceedsStock = useMemo(
+    () => outbound && currentStock !== null && quantity !== "" && Number(quantity) > currentStock,
+    [outbound, currentStock, quantity],
+  );
+
+  const productOptions = useMemo(
+    () => products.map((product) => <option key={product.id} value={product.id}>{product.name} · {product.sku}</option>),
+    [products],
+  );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -95,7 +106,7 @@ export default function OrderForm({ direction }: { direction: "inbound" | "outbo
         <label>Producto (SKU)
           <select required value={productId} onChange={(event) => { setProductId(event.target.value); setError(""); setQuantityError(""); }}>
             <option value="">Selecciona un producto</option>
-            {products.map((product) => <option key={product.id} value={product.id}>{product.name} · {product.sku}</option>)}
+            {productOptions}
           </select>
         </label>
         <label>Almacén

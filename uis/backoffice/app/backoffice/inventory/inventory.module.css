@@ -37,6 +37,7 @@
 .success { background: #d9f4e5; color: #126239; }
 .stockBox { border-left: 4px solid #00766b; background: #e8f4f1; font-weight: 700; }
 .warning { border-left: 4px solid #b77700; background: #fff1c7; color: #754e00; }
+.loading { padding: 2rem 0; color: #53686c; font-style: italic; }
 .emptyState { padding: 1.5rem 0; color: #53686c; }
 .userUuid { font-family: monospace; overflow-wrap: anywhere; }
 @media (max-width: 680px) { .topbar { align-items: flex-start; } .context { display: none; } .nav { overflow-x: auto; } .nav button { margin-left: 0; } .page { padding-top: 1.3rem; } .table { min-width: 760px; } }

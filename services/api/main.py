@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import csv
 import io
+import logging
 import os
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -37,9 +39,35 @@ from app.routers import auth as auth_router
 from app.routers import profiles as profiles_router
 from app.routers import users as users_router
 
+from cache import invalidate_cache
+
+
+# Configuración de logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
+)
+logger = logging.getLogger("api.timing")
+
 
 # Inicialización de FastAPI
 app = FastAPI(title="TrackFlow Unified API", version="1.0.0")
+
+
+# ──────────────────────────────────────────────
+# Middleware de timing
+# ──────────────────────────────────────────────
+
+
+@app.middleware("http")
+async def timing_middleware(request: Request, call_next):
+    start = time.perf_counter()
+    response = await call_next(request)
+    duration = (time.perf_counter() - start) * 1000
+    logger.info(
+        f"{request.method} {request.url.path} → {response.status_code} | {duration:.1f}ms"
+    )
+    return response
 
 
 def humanize_validation_error(error: dict[str, Any]) -> str:
