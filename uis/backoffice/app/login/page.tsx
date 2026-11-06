@@ -31,14 +31,11 @@ export default function LoginPage() {
 
   return (
     <main className={styles.loginPage}>
-      <header className={styles.loginBrand}>
-        <span className={styles.loginMark} aria-hidden="true">TF</span>
-        <div>
-          <strong>TrackFlow Tech</strong>
-          <p>Operaciones de almacén</p>
-        </div>
-      </header>
       <section className={styles.loginCard} aria-labelledby="backoffice-login-title">
+        <header className={styles.loginBrand}>
+          <span className={styles.loginMark} aria-hidden="true">TF</span>
+          <strong>TrackFlow Tech</strong>
+        </header>
         <div className={styles.loginIntro}>
           <h1 id="backoffice-login-title">Iniciar sesión</h1>
           <p>Accede al panel de inventario y operaciones.</p>
