@@ -30,14 +30,32 @@ export default function LoginPage() {
   }
 
   return (
-    <main className={styles.page}>
-      <div className={styles.heading}><div><p>TrackFlow Tech · Operaciones</p><h1>Iniciar sesión</h1></div></div>
-      <form className={styles.form} onSubmit={handleSubmit} style={{ maxWidth: 400 }}>
-        <label>Correo electrónico<input name="email" type="email" autoComplete="username" required /></label>
-        <label>Contraseña<input name="password" type="password" autoComplete="current-password" required /></label>
-        <button className={styles.button} type="submit" disabled={submitting}>{submitting ? "Accediendo..." : "Acceder"}</button>
-        {error && <p className={styles.error} role="alert">{error}</p>}
-      </form>
+    <main className={styles.loginPage}>
+      <header className={styles.loginBrand}>
+        <span className={styles.loginMark} aria-hidden="true">TF</span>
+        <div>
+          <strong>TrackFlow Tech</strong>
+          <p>Operaciones de almacén</p>
+        </div>
+      </header>
+      <section className={styles.loginCard} aria-labelledby="backoffice-login-title">
+        <div className={styles.loginIntro}>
+          <h1 id="backoffice-login-title">Iniciar sesión</h1>
+          <p>Accede al panel de inventario y operaciones.</p>
+        </div>
+        <form className={styles.loginForm} onSubmit={handleSubmit}>
+          <label htmlFor="backoffice-email">Correo electrónico
+            <input id="backoffice-email" name="email" type="email" autoComplete="username" required />
+          </label>
+          <label htmlFor="backoffice-password">Contraseña
+            <input id="backoffice-password" name="password" type="password" autoComplete="current-password" required />
+          </label>
+          <button className={styles.button} type="submit" disabled={submitting}>
+            {submitting ? "Accediendo..." : "Acceder"}
+          </button>
+          {error && <p className={styles.error} role="alert">{error}</p>}
+        </form>
+      </section>
     </main>
   );
 }

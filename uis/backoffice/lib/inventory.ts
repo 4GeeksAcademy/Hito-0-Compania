@@ -1,5 +1,5 @@
 import { clearSession, getApiBase, getAuthToken } from "./auth";
-import type { InventoryOrder, OrderCreate, Product, Warehouse } from "../types/inventory";
+import type { InventoryOrder, OrderCreate, PickingTask, PickingTaskCreate, Product, ProductCreate, Warehouse } from "../types/inventory";
 
 export class InventoryApiError extends Error {
   constructor(public readonly status: number, message: string) {
@@ -54,6 +54,13 @@ export async function listProducts(): Promise<Product[]> {
   return response.items;
 }
 
+export function createProduct(product: ProductCreate): Promise<Product> {
+  return inventoryRequest<Product>("/inventory/products", {
+    method: "POST",
+    body: JSON.stringify(product),
+  });
+}
+
 export function getProduct(id: number, warehouse: Warehouse): Promise<Product> {
   return inventoryRequest<Product>(`/inventory/products/${id}?warehouse=${encodeURIComponent(warehouse)}`);
 }
@@ -72,4 +79,23 @@ export function createOutboundOrder(order: OrderCreate): Promise<InventoryOrder>
 
 export function listOrders(): Promise<InventoryOrder[]> {
   return inventoryRequest<InventoryOrder[]>("/inventory/orders");
+}
+
+export function listPickingTasks(): Promise<PickingTask[]> {
+  return inventoryRequest<PickingTask[]>("/inventory/picking/tasks");
+}
+
+export function createPickingTask(task: PickingTaskCreate): Promise<PickingTask> {
+  return inventoryRequest<PickingTask>("/inventory/picking/tasks", {
+    method: "POST",
+    body: JSON.stringify(task),
+  });
+}
+
+export function completePickingTask(taskId: number): Promise<PickingTask> {
+  return inventoryRequest<PickingTask>(`/inventory/picking/tasks/${taskId}/complete`, { method: "POST" });
+}
+
+export function advanceDemoTracking(taskId: number): Promise<PickingTask> {
+  return inventoryRequest<PickingTask>(`/inventory/picking/tasks/${taskId}/tracking-demo/advance`, { method: "POST" });
 }

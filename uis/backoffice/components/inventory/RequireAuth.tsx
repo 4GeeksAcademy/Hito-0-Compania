@@ -16,5 +16,5 @@ export default function RequireAuth({ children }: { children: ReactNode }) {
     }
   }, [router]);
 
-  return authenticated ? <>{children}</> : <p role="status" style={{ padding: "2rem" }}>Verificando sesión...</p>;
+  return authenticated ? <>{children}</> : <p className="inventory-auth-loading" role="status">Verificando sesión...</p>;
 }

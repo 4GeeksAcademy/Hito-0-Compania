@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import Enum
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -179,6 +180,35 @@ class IncidentResponse(BaseModel):
 	branch: str
 	created_at: str
 	updated_at: str
+
+
+class IncidentTriageSuggestion(BaseModel):
+	"""AI proposal for an incident. It is not persisted automatically."""
+
+	model_config = ConfigDict(extra="forbid")
+
+	summary: str = Field(min_length=1, max_length=500)
+	priority: Literal["low", "medium", "high", "urgent"]
+	suggested_category: Literal["queja", "solicitud", "fallo_operativo"]
+	next_step: str = Field(min_length=1, max_length=500)
+	draft_reply: str = Field(min_length=1, max_length=1000)
+	rationale: str = Field(min_length=1, max_length=500)
+
+
+class IncidentTriageReviewCreate(BaseModel):
+	model_config = ConfigDict(extra="forbid")
+
+	decision: Literal["approved", "rejected"]
+	suggestion: IncidentTriageSuggestion
+
+
+class IncidentTriageReviewResponse(BaseModel):
+	id: str
+	incident_id: str
+	reviewer_id: str
+	decision: Literal["approved", "rejected"]
+	created_at: str
+	suggestion: IncidentTriageSuggestion
 
 
 class PaginatedIncidentResponse(BaseModel):
