@@ -147,7 +147,7 @@ export default function IncidentTriagePage() {
     <>
       <div className={styles.heading}>
         <div>
-          <h1>Triage IA de incidencias</h1>
+          <h1>Gestión de incidencias</h1>
           <p>Revisa una sugerencia de análisis antes de responder o actualizar el caso.</p>
         </div>
       </div>
