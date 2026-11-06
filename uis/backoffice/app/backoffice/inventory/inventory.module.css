@@ -4,6 +4,8 @@
 .brand { color: #006c66; font-weight: 700; font-size: .82rem; text-transform: uppercase; }
 .context { color: #53686c; font-size: .85rem; }
 .nav { display: flex; align-items: center; gap: .3rem; padding: .6rem max(1rem, calc((100vw - 1200px) / 2)); background: #fff; border-bottom: 1px solid #cddbd9; }
+.navLinks { display: flex; align-items: center; gap: .3rem; width: 100%; }
+.nav .menuToggle { display: none; }
 .nav a, .nav button { color: #29444b; text-decoration: none; border: 0; background: none; border-radius: 6px; padding: .6rem .8rem; font-weight: 600; font-size: .9rem; white-space: nowrap; }
 .nav a:hover, .nav button:hover { background: #e8f4f1; }
 .nav a[aria-current="page"] { background: #d4ede7; color: #005a51; }
@@ -110,4 +112,12 @@
 @media (max-width: 480px) { .triageFilters { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 760px) { .pickingForm { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 480px) { .pickingForm { grid-template-columns: minmax(0, 1fr); } .pickingNotes { grid-column: auto; } .pickTaskMain, .pickingTasksHeading { align-items: flex-start; } }
-@media (max-width: 680px) { .topbar { align-items: flex-start; } .context { display: none; } .nav { overflow-x: auto; } .nav button { margin-left: 0; } .page { padding-top: 1.3rem; } .table { min-width: 760px; } }
+@media (max-width: 760px) {
+	.nav { flex-direction: column; align-items: stretch; }
+	.nav .menuToggle { display: grid; width: 44px; height: 44px; place-items: center; margin-left: 0; padding: 0; font-size: 1.4rem; }
+	.navLinks { display: none; flex-direction: column; align-items: stretch; }
+	.navLinksOpen { display: flex; }
+	.navLinks button { margin-left: 0; text-align: left; }
+	.nav .menuToggle:focus-visible { outline: 2px solid #00786e; outline-offset: 2px; }
+}
+@media (max-width: 680px) { .topbar { align-items: flex-start; } .context { display: none; } .page { padding-top: 1.3rem; } .table { min-width: 760px; } }
