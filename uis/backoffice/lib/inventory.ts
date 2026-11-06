@@ -1,6 +1,17 @@
 import { clearSession, getApiBase, getAuthToken } from "./auth";
 import type { InventoryOrder, OrderCreate, PickingTask, PickingTaskCreate, Product, ProductCreate, Warehouse } from "../types/inventory";
 
+const cacheDuration = 15_000;
+const cachedPaths = new Set(["/inventory/products", "/inventory/orders", "/inventory/picking/tasks"]);
+const responseCache = new Map<string, { value: unknown; expiresAt: number }>();
+let cacheToken: string | null = null;
+let cacheVersion = 0;
+
+function clearInventoryCache(): void {
+  responseCache.clear();
+  cacheVersion += 1;
+}
+
 export class InventoryApiError extends Error {
   constructor(public readonly status: number, message: string) {
     super(message);
@@ -22,10 +33,20 @@ function errorMessage(payload: unknown, status: number): string {
 
 async function inventoryRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = getAuthToken();
+  if (token !== cacheToken) {
+    clearInventoryCache();
+    cacheToken = token;
+  }
   if (!token) {
     clearSession();
     throw new InventoryApiError(401, "Inicia sesión para continuar.");
   }
+
+  const isMutation = (init.method || "GET").toUpperCase() !== "GET";
+  if (isMutation) clearInventoryCache();
+  const version = cacheVersion;
+  const cached = cachedPaths.has(path) && !isMutation ? responseCache.get(path) : undefined;
+  if (cached && cached.expiresAt > Date.now()) return cached.value as T;
 
   let response: Response;
   try {
@@ -35,16 +56,24 @@ async function inventoryRequest<T>(path: string, init: RequestInit = {}): Promis
       headers: { "Content-Type": "application/json", ...init.headers, Authorization: `Bearer ${token}` },
     });
   } catch {
+    if (isMutation) clearInventoryCache();
     throw new Error("No se pudo conectar con la API de inventario.");
   }
+  if (isMutation) clearInventoryCache();
 
   const payload = response.headers.get("content-type")?.includes("application/json")
     ? await response.json().catch(() => null)
     : null;
   if (!response.ok) {
     const message = errorMessage(payload, response.status);
-    if (response.status === 401) clearSession();
+    if (response.status === 401) {
+      clearInventoryCache();
+      clearSession();
+    }
     throw new InventoryApiError(response.status, message);
+  }
+  if (!isMutation && cachedPaths.has(path) && version === cacheVersion && token === getAuthToken()) {
+    responseCache.set(path, { value: payload, expiresAt: Date.now() + cacheDuration });
   }
   return payload as T;
 }
