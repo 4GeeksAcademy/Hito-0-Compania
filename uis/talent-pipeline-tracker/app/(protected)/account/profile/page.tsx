@@ -1,6 +1,7 @@
 'use client';
 
 import { type FormEvent, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 
 import FeedbackAlert from '@/src/components/FeedbackAlert';
 import { useAuth } from '@/src/context/AuthContext';
@@ -78,6 +79,13 @@ export default function AccountProfilePage() {
 
   return (
       <div className="mx-auto max-w-2xl px-4 py-12">
+        <Link
+          href="/"
+          className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-indigo-700 hover:text-indigo-900"
+        >
+          <span aria-hidden="true">←</span>
+          Volver a candidatos
+        </Link>
         {/* Cabecera */}
         <div className="mb-8 flex items-center justify-between">
           <div>

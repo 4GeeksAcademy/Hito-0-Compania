@@ -100,7 +100,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Inter, sans-serif;
+  font-family: var(--font-geist-sans), sans-serif;
 }
 
 .material-symbols-outlined {
