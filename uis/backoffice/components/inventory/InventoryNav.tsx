@@ -11,7 +11,7 @@ const pages = [
   { href: "/backoffice/inventory/orders/inbound", label: "Nueva entrada" },
   { href: "/backoffice/inventory/picking", label: "Picking" },
   { href: "/backoffice/inventory/orders", label: "Historial" },
-  { href: "/backoffice/inventory/incidents", label: "Triage IA" },
+  { href: "/backoffice/inventory/incidents", label: "Gestión de incidencias" },
 ];
 
 export default function InventoryNav() {
