@@ -67,3 +67,22 @@ class OutboundOrder(SQLModel, table=True):
     user_uuid: str = Field(min_length=1, max_length=255)
     notes: Optional[str] = Field(default=None, max_length=500)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class PickTask(SQLModel, table=True):
+    """Tarea de picking que solo descuenta stock al confirmarse."""
+
+    __tablename__: str = "picking_tasks"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    product_id: int = Field(foreign_key="products.id", index=True)
+    quantity: int = Field(gt=0)
+    warehouse: str = Field(min_length=1, max_length=100)
+    user_uuid: str = Field(min_length=1, max_length=255)
+    notes: Optional[str] = Field(default=None, max_length=500)
+    status: str = Field(default="pending", index=True)
+    outbound_order_id: Optional[int] = Field(default=None, foreign_key="outbound_orders.id")
+    demo_tracking_stage: str = Field(default="pending_pick")
+    demo_tracking_updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    picked_at: Optional[datetime] = None

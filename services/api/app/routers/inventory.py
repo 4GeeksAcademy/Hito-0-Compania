@@ -1,14 +1,18 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, func, select
 
 from app.core.database import get_db
 from app.core.security import get_current_user
-from app.models.inventory import InboundOrder, OutboundOrder, Product
+from app.models.inventory import InboundOrder, OutboundOrder, PickTask, Product
 from app.schemas.inventory import (
     InboundOrderCreate,
     InboundOrderResponse,
     OutboundOrderCreate,
     OutboundOrderResponse,
+    PickingTaskCreate,
+    PickingTaskResponse,
     PaginatedProductsResponse,
     ProductCreate,
     ProductResponse,
@@ -65,6 +69,25 @@ def _product_to_response(product: Product, db_session: Session, warehouse: str |
         category=product.category,
         created_at=product.created_at,
         current_stock=stock,
+    )
+
+
+def _picking_task_to_response(task: PickTask, product_name: str, product_sku: str) -> PickingTaskResponse:
+    return PickingTaskResponse(
+        id=task.id,
+        product_id=task.product_id,
+        product_name=product_name,
+        product_sku=product_sku,
+        quantity=task.quantity,
+        warehouse=task.warehouse,
+        user_uuid=task.user_uuid,
+        notes=task.notes,
+        status=task.status,
+        outbound_order_id=task.outbound_order_id,
+        demo_tracking_stage=task.demo_tracking_stage,
+        demo_tracking_updated_at=task.demo_tracking_updated_at,
+        created_at=task.created_at,
+        picked_at=task.picked_at,
     )
 
 
@@ -298,3 +321,132 @@ def list_orders(
     result.sort(key=lambda x: x["created_at"], reverse=True)
 
     return result
+
+
+# ════════════════════════════════════════════
+# Tareas de picking y seguimiento de demostración
+# ════════════════════════════════════════════
+
+@router.get("/picking/tasks", response_model=list[PickingTaskResponse])
+def list_picking_tasks(
+    db_session: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    tasks = db_session.exec(
+        select(PickTask, Product.name, Product.sku)
+        .join(Product, PickTask.product_id == Product.id)
+        .order_by(PickTask.created_at.desc())
+    ).all()
+    return [_picking_task_to_response(task, product_name, product_sku) for task, product_name, product_sku in tasks]
+
+
+@router.post("/picking/tasks", response_model=PickingTaskResponse, status_code=201)
+def create_picking_task(
+    payload: PickingTaskCreate,
+    db_session: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    product = db_session.get(Product, payload.product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+
+    stock = _calculate_stock(db_session, payload.product_id, warehouse=payload.warehouse)
+    if stock < payload.quantity:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Stock insuficiente en {payload.warehouse}. Disponible: {stock}.",
+        )
+
+    task = PickTask(
+        product_id=payload.product_id,
+        quantity=payload.quantity,
+        warehouse=payload.warehouse,
+        user_uuid=current_user["id"],
+        notes=payload.notes,
+    )
+    db_session.add(task)
+    db_session.commit()
+    db_session.refresh(task)
+    return _picking_task_to_response(task, product.name, product.sku)
+
+
+@router.post("/picking/tasks/{task_id}/complete", response_model=PickingTaskResponse)
+def complete_picking_task(
+    task_id: int,
+    db_session: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    task = db_session.get(PickTask, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Tarea de picking no encontrada")
+
+    product = db_session.get(Product, task.product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    if task.status == "picked":
+        return _picking_task_to_response(task, product.name, product.sku)
+
+    stock = _calculate_stock(db_session, task.product_id, warehouse=task.warehouse)
+    if stock < task.quantity:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Stock insuficiente en {task.warehouse}. Disponible: {stock}.",
+        )
+
+    now = datetime.now(timezone.utc)
+    notes = f"Picking #{task.id} confirmado"
+    if task.notes:
+        notes = f"{notes}. {task.notes}"
+
+    outbound_order = OutboundOrder(
+        product_id=task.product_id,
+        quantity=task.quantity,
+        warehouse=task.warehouse,
+        user_uuid=current_user["id"],
+        notes=notes[:500],
+    )
+    db_session.add(outbound_order)
+    db_session.flush()
+
+    task.status = "picked"
+    task.outbound_order_id = outbound_order.id
+    task.picked_at = now
+    task.demo_tracking_stage = "ready_for_dispatch"
+    task.demo_tracking_updated_at = now
+    db_session.add(task)
+    db_session.commit()
+    db_session.refresh(task)
+
+    invalidate_cache("list_products")
+    return _picking_task_to_response(task, product.name, product.sku)
+
+
+@router.post("/picking/tasks/{task_id}/tracking-demo/advance", response_model=PickingTaskResponse)
+def advance_demo_tracking(
+    task_id: int,
+    db_session: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    task = db_session.get(PickTask, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Tarea de picking no encontrada")
+    if task.status != "picked":
+        raise HTTPException(status_code=409, detail="Confirma el picking antes de simular el tracking")
+
+    next_stage = {
+        "ready_for_dispatch": "in_transit_demo",
+        "in_transit_demo": "delivered_demo",
+    }.get(task.demo_tracking_stage)
+    if not next_stage:
+        raise HTTPException(status_code=409, detail="El tracking de demostración ya llegó a su último paso")
+
+    task.demo_tracking_stage = next_stage
+    task.demo_tracking_updated_at = datetime.now(timezone.utc)
+    db_session.add(task)
+    db_session.commit()
+    db_session.refresh(task)
+
+    product = db_session.get(Product, task.product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    return _picking_task_to_response(task, product.name, product.sku)

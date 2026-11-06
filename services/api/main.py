@@ -8,14 +8,12 @@ import sys
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
-from fastapi.staticfiles import StaticFiles
 
 # Ajuste de path para que "services.api" y "app" sean importables sin importar el cwd
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -215,17 +213,6 @@ app.include_router(inventory_router.router)
 app.include_router(suppliers_router)
 # Incidencias — acceso público (no requiere login)
 app.include_router(incidents_router)
-
-# Montaje de archivos estáticos para Backoffice
-BACKOFFICE_DIR = Path(__file__).resolve().parents[2] / "uis" / "backoffice"
-if BACKOFFICE_DIR.exists():
-    app.mount("/backoffice", StaticFiles(directory=BACKOFFICE_DIR, html=True), name="backoffice")
-
-# Montaje de archivos estáticos para Gestor de Incidencias
-INCIDENT_DIR = Path(__file__).resolve().parents[2] / "uis" / "incident-manager"
-if INCIDENT_DIR.exists():
-    app.mount("/incident-manager", StaticFiles(directory=INCIDENT_DIR, html=True), name="incident-manager")
-
 
 # Variables globales para análisis de incidentes
 LAST_ANALYSIS: dict[str, Any] | None = None

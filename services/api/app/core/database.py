@@ -5,7 +5,7 @@ from sqlmodel import Session, SQLModel, create_engine
 from tinydb import TinyDB
 
 from app.core.config import DATABASE_URL
-from app.models.inventory import InboundOrder, OutboundOrder, Product  # noqa: F401
+from app.models.inventory import InboundOrder, OutboundOrder, PickTask, Product  # noqa: F401
 
 # ── Directorio de datos ──
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -29,6 +29,7 @@ users_table = db.table("users")
 profiles_table = db.table("profiles")
 reset_tokens_table = db.table("reset_tokens")
 incidents_table = db.table("incidents")
+incident_triage_reviews_table = db.table("incident_triage_reviews")
 
 # ════════════════════════════════════════════
 # Base de datos 2: Supabase / PostgreSQL (inventario)

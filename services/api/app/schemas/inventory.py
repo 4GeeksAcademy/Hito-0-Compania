@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -127,3 +127,27 @@ class OutboundOrderListResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class PickingTaskCreate(BaseModel):
+    product_id: int = Field(gt=0)
+    quantity: int = Field(gt=0)
+    warehouse: str = Field(min_length=1, max_length=100)
+    notes: Optional[str] = Field(default=None, max_length=500)
+
+
+class PickingTaskResponse(BaseModel):
+    id: int
+    product_id: int
+    product_name: str
+    product_sku: str
+    quantity: int
+    warehouse: str
+    user_uuid: str
+    notes: Optional[str] = None
+    status: Literal["pending", "picked"]
+    outbound_order_id: Optional[int] = None
+    demo_tracking_stage: Literal["pending_pick", "ready_for_dispatch", "in_transit_demo", "delivered_demo"]
+    demo_tracking_updated_at: datetime
+    created_at: datetime
+    picked_at: Optional[datetime] = None

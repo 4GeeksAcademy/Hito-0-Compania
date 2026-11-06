@@ -1,5 +1,5 @@
-import OrderForm from "../../../../../components/inventory/OrderForm";
+import { redirect } from "next/navigation";
 
 export default function OutboundPage() {
-  return <OrderForm direction="outbound" />;
+  redirect("/backoffice/inventory/picking");
 }

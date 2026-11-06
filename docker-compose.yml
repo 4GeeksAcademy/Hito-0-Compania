@@ -20,8 +20,6 @@ services:
       - ./services:/app/services
       # Módulo compartido (packages/shared/py) necesario para incident_analyzer
       - ./packages:/app/packages
-      # UI estática (incident-manager) servida como archivos estáticos en /incident-manager
-      - ./uis:/app/uis
       # Scripts (incluye incidents-COMPANY.csv para seed automático de incidencias)
       - ./scripts:/app/scripts
     env_file:

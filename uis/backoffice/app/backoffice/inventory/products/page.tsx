@@ -22,7 +22,7 @@ export default function ProductsPage() {
           <td><span className={`${styles.badge} ${stockClass}`}>{product.current_stock} · {stockLabel}</span></td>
           <td><div className={styles.actions}>
             <Link href={`/backoffice/inventory/orders/inbound?productId=${product.id}`}>Registrar entrada</Link>
-            <Link href={`/backoffice/inventory/orders/outbound?productId=${product.id}`}>Registrar salida</Link>
+            <Link href={`/backoffice/inventory/picking?productId=${product.id}`}>Preparar picking</Link>
           </div></td>
         </tr>
       );
@@ -32,7 +32,10 @@ export default function ProductsPage() {
 
   return (
     <>
-      <div className={styles.heading}><div><h1>Catálogo de stock</h1><p>Productos en los almacenes de TrackFlow.</p></div></div>
+      <div className={styles.heading}>
+        <div><h1>Catálogo de stock</h1><p>Productos en los almacenes de TrackFlow.</p></div>
+        <Link className={styles.buttonLink} href="/backoffice/inventory/products/new">＋ Agregar producto</Link>
+      </div>
       {loading && <p role="status">Cargando productos...</p>}
       {error && <p className={styles.error} role="alert">{error}</p>}
       {!loading && !error && (products.length ? (
